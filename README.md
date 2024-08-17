@@ -1,33 +1,29 @@
 ### HG-DREAM G4 simulation: dream 2.04
 
-Enivronment:
+#### Environment:
 
 (Requirement: pyroot and GEANT4 are installed.)
 
-ToDO: Finish the installation guide.
-
-Then modify `muonSetup.sh` in dream2.03 to set environment for pyroot and geant4. Run
+For machines with cvmfs mounted, can directly source the environment
 ```
-source muonSetupMac.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-dbg/setup.sh
 ```
+change the path according to the OS.
 
-Compile code:
+#### Compile:
 
-build program in  "build" area,
-
+build program in "build" area,
 ```
-mkdir build01
-cd build01
+cd sim
+mkdir build
+cd build
 cmake ..
-make
+make -j 4
 ```
 
-Modify code and run.
-
-after a modification of code, re-build and run.
+#### Run the code
 
 ```
-make
 source runBatch03_single_param.sh
 ```
 
@@ -47,6 +43,7 @@ Structure of software:
 `sim/src/B4bSteppingAction.cc`:access hits at each step
 `sim/src/CaloTree.cc`:analysis and hit handling
 
+#### Analysis
 
 Simple analysis code (jupyter notebook), hgdream-3d-01.ipynb is under `plotter` subdirectory.
 
