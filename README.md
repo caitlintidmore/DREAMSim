@@ -21,6 +21,13 @@ cmake ..
 make -j 4
 ```
 
+Structure of software:
+
+- `sim/exampleB4b.cc`: main program
+- `sim/src/B4DetectorConstruction.cc`:definition of the detector
+- `sim/src/B4bSteppingAction.cc`:access hits at each step
+- `sim/src/CaloTree.cc`:analysis and hit handling
+
 #### Run the code
 
 ```
@@ -31,17 +38,10 @@ The output files are:
 - root: histograms
 - csv: hits in each readout cell (2D and 3D)
 
-Run parameters:  
-
-All run paramteres are defined in "paramBatch03_single.mac" and
+Run parameters: 
+- All run paramteres are defined in "paramBatch03_single.mac" and
 may be overloaded in "runBatch03_single_param.sh".
 
-Structure of software:
-
-`sim/exampleB4b.cc`: main program
-`sim/src/B4DetectorConstruction.cc`:definition of the detector
-`sim/src/B4bSteppingAction.cc`:access hits at each step
-`sim/src/CaloTree.cc`:analysis and hit handling
 
 #### Analysis
 
