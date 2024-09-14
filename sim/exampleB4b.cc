@@ -27,8 +27,8 @@
 /// \file exampleB4b.cc
 /// \brief Main program of the B4b example
 
-//#include "G4RunManagerFactory.hh"
-#include "G4RunManager.hh" 
+// #include "G4RunManagerFactory.hh"
+#include "G4RunManager.hh"
 #include "G4UImanager.hh"
 // #include "FTFP_BERT.hh"
 #include "QGSP_BERT.hh"
@@ -53,62 +53,74 @@ using namespace std;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-int main(int argc,char** argv)
+int main(int argc, char **argv)
 {
 
-  bool batchJob=false;
+  bool batchJob = false;
 
   string macro;
 
-  for ( G4int i=1; i<argc; i=i+2 ) {
-    string a=argv[i];
-    if      ( G4String(argv[i]) == "-b" ) { macro = argv[i+1]; batchJob=true;}
-    else if ( G4String(argv[i]) == "-i" ) { macro = argv[i+1]; batchJob=false;}
-    else if(a.substr(0,1)!="-") {
-        std::cout<<"argument error: parameter shoudl start with -. "<<a<<std::endl;
-        return 0;
-     }
-  } 
-  
-  CaloTree*  histo = new CaloTree(macro,argc, argv); 
+  for (G4int i = 1; i < argc; i = i + 2)
+  {
+    string a = argv[i];
+    if (G4String(argv[i]) == "-b")
+    {
+      macro = argv[i + 1];
+      batchJob = true;
+    }
+    else if (G4String(argv[i]) == "-i")
+    {
+      macro = argv[i + 1];
+      batchJob = false;
+    }
+    else if (a.substr(0, 1) != "-")
+    {
+      std::cout << "argument error: parameter shoudl start with -. " << a << std::endl;
+      return 0;
+    }
+  }
 
-  G4UIExecutive* ui = nullptr;;
-  if ( !batchJob ) {
+  CaloTree *histo = new CaloTree(macro, argc, argv);
+
+  G4UIExecutive *ui = nullptr;
+  ;
+  if (!batchJob)
+  {
     ui = new G4UIExecutive(argc, argv);
   }
-  
+
   // Choose the Random engine
   //
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
-  
+
   // Generate rndom number seeds;
   long seeds[2];
-  //std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
-  //auto duration = now.time_since_epoch();
-  //auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-  //long long  micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-  //std::cout<<"millis "<<millis <<std::endl;
-  //std::cout<<"micros "<<micros <<std::endl;
-  //long long t1=micros/10000000;
-  //long long t2=micros-t1*10000000;
-  long long t1=1234;
-  long long t2=456;
-  std::cout<<"t1="<<t1<<"   t2="<<t2<<std::endl;
-  int kseed=histo->getParamI("runNumber")+histo->getParamI("runSeq")*3333;
-  seeds[0] =long(t2)+long(kseed);
-  seeds[1] =seeds[0]+8134;
+  // std::chrono::system_clock::time_point now=std::chrono::system_clock::now();
+  // auto duration = now.time_since_epoch();
+  // auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+  // long long  micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+  // std::cout<<"millis "<<millis <<std::endl;
+  // std::cout<<"micros "<<micros <<std::endl;
+  // long long t1=micros/10000000;
+  // long long t2=micros-t1*10000000;
+  long long t1 = 1234;
+  long long t2 = 456;
+  std::cout << "t1=" << t1 << "   t2=" << t2 << std::endl;
+  int kseed = histo->getParamI("runNumber") + histo->getParamI("runSeq") * 3333;
+  seeds[0] = long(t2) + long(kseed);
+  seeds[1] = seeds[0] + 8134;
 
   // seeds[0]=2345;
   // seeds[1]=7999;
 
   G4Random::setTheSeeds(seeds);
   G4Random::showEngineStatus();
-  std::cout<<"seeds[0]="<<seeds[0]<<"   seeds[1]="<<seeds[1]<<std::endl;
+  std::cout << "seeds[0]=" << seeds[0] << "   seeds[1]=" << seeds[1] << std::endl;
 
   // Construct a serial run manager
   //
-  //auto* runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::SerialOnly);
-  auto* runManager = new G4RunManager;
+  // auto* runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::SerialOnly);
+  auto *runManager = new G4RunManager;
 
   // Set mandatory initialization classes
   //
@@ -120,9 +132,9 @@ int main(int argc,char** argv)
   auto physicsList = new QGSP_BERT;
 
   physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
-  G4OpticalPhysics* opticalPhysics = new G4OpticalPhysics();
+  G4OpticalPhysics *opticalPhysics = new G4OpticalPhysics();
   physicsList->RegisterPhysics(opticalPhysics);
-  
+
   // G4Cerenkov* theCerenkovProcess=new G4Cerenkov("Cerenkov");
   // theCerenkovProcess->SetTrackSecondariesFirst(true);
   // nt MaxNumberPhotons=300;
@@ -131,22 +143,22 @@ int main(int argc,char** argv)
 
   runManager->SetUserInitialization(physicsList);
 
-  auto gen_action =new B4PrimaryGeneratorAction(detector,histo);
+  auto gen_action = new B4PrimaryGeneratorAction(detector, histo);
   runManager->SetUserAction(gen_action);
 
   auto run_action = new B4bRunAction(histo);
   runManager->SetUserAction(run_action);
   //
-  auto  event_action = new B4bEventAction(detector,gen_action,histo);
+  auto event_action = new B4bEventAction(detector, gen_action, histo);
   runManager->SetUserAction(event_action);
   //
-  auto stepping_action =new B4bSteppingAction(event_action,histo);
+  auto stepping_action = new B4bSteppingAction(event_action, histo);
   runManager->SetUserAction(stepping_action);
 
   runManager->Initialize();
   // auto actionInitialization = new B4bActionInitialization(detConstruction);
   // runManager->SetUserInitialization(actionInitialization);
-  
+
   // Initialize visualization
   auto visManager = new G4VisExecutive;
   visManager->Initialize();
@@ -156,12 +168,13 @@ int main(int argc,char** argv)
 
   // Process macro or start UI session
   //
-  if ( batchJob ) {
+  if (batchJob)
+  {
     // batch mode
-    std::cout<<"debug:  batch mode"<<std::endl;
+    std::cout << "debug:  batch mode" << std::endl;
     G4String command = "/control/execute ";
-    cout<<"command: "<<command<<endl;
-    UImanager->ApplyCommand(command+macro);  // macro does not have /run/beamOn 100
+    cout << "command: " << command << endl;
+    UImanager->ApplyCommand(command + macro); // macro does not have /run/beamOn 100
 
     //    beams are now defined in B4PrimaryGeneratorAction...
     // command="/gun/particle "+histo->getParamS("gun_particle");
@@ -173,30 +186,29 @@ int main(int argc,char** argv)
     // UImanager->ApplyCommand(command);;
 
     // string evtmax="100";
-    command="/run/beamOn "+histo->getParamS("numberOfEvents");;
-    cout<<"command: "<<command<<endl;
+    command = "/run/beamOn " + histo->getParamS("numberOfEvents");
+    ;
+    cout << "command: " << command << endl;
     UImanager->ApplyCommand(command);
   }
-  else {
+  else
+  {
     // interactive mode
-    std::cout<<"debug:  interactive mode"<<std::endl;
+    std::cout << "debug:  interactive mode" << std::endl;
     UImanager->ApplyCommand("/control/execute init_vis.mac");
-    std::cout<<"debug:  interactive mode, step 2"<<std::endl;
+    std::cout << "debug:  interactive mode, step 2" << std::endl;
     ui->SessionStart();
     delete ui;
   }
 
-  
-
   // Job termination
-  std::cout<<"Job termination..."<<std::endl;
+  std::cout << "Job termination..." << std::endl;
   histo->EndJob();
-  std::cout<<"after histo->EndJob()..."<<std::endl;
-
+  std::cout << "after histo->EndJob()..." << std::endl;
 
   G4Random::showEngineStatus();
   // Free the store: user actions, physics_list and detector_description are
-  // owned and deleted by the run manager, so they should not be deleted 
+  // owned and deleted by the run manager, so they should not be deleted
   // in the main() program !
 
   delete visManager;
