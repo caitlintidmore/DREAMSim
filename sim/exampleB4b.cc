@@ -83,7 +83,6 @@ int main(int argc, char **argv)
   CaloTree *histo = new CaloTree(macro, argc, argv);
 
   G4UIExecutive *ui = nullptr;
-  ;
   if (!batchJob)
   {
     ui = new G4UIExecutive(argc, argv);

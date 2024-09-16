@@ -157,11 +157,31 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
 
    tree->Branch("nhits3dSS", &m_nhits3dSS);
    tree->Branch("id3dSS", &m_id3dSS);
+   tree->Branch("tkey3dSS", &m_tkey3dSS);
+   tree->Branch("zkey3dSS", &m_zkey3dSS);
+   tree->Branch("type3dSS", &m_type3dSS);
+   tree->Branch("area3dSS", &m_area3dSS);
+   tree->Branch("ix3dSS", &m_ix3dSS);
+   tree->Branch("iy3dSS", &m_iy3dSS);
+   tree->Branch("ixx3dSS", &m_ixx3dSS);
+   tree->Branch("iyy3dSS", &m_iyy3dSS);
+   tree->Branch("zslice3dSS", &m_zslice3dSS);
+   tree->Branch("tslice3dSS", &m_tslice3dSS);
    tree->Branch("ph3dSS", &m_ph3dSS);
    tree->Branch("sum3dSS", &m_sum3dSS);
 
    tree->Branch("nhits3dCC", &m_nhits3dCC);
    tree->Branch("id3dCC", &m_id3dCC);
+   tree->Branch("tkey3dCC", &m_tkey3dCC);
+   tree->Branch("zkey3dCC", &m_zkey3dCC);
+   tree->Branch("type3dCC", &m_type3dCC);
+   tree->Branch("area3dCC", &m_area3dCC);
+   tree->Branch("ix3dCC", &m_ix3dCC);
+   tree->Branch("iy3dCC", &m_iy3dCC);
+   tree->Branch("ixx3dCC", &m_ixx3dCC);
+   tree->Branch("iyy3dCC", &m_iyy3dCC);
+   tree->Branch("zslice3dCC", &m_zslice3dCC);
+   tree->Branch("tslice3dCC", &m_tslice3dCC);
    tree->Branch("ph3dCC", &m_ph3dCC);
    tree->Branch("sum3dCC", &m_sum3dCC);
 }
@@ -235,6 +255,16 @@ void CaloTree::EndEvent()
             ky = ky + id.iyy() + 1;
          } // 3mm SiPM
          m_id3dCC.push_back(id.ix() * 10000000 + ky * 1000 + id.tslice());
+         m_tkey3dCC.push_back(id.getTkey());
+         m_zkey3dCC.push_back(id.getZkey());
+         m_type3dCC.push_back(id.type());
+         m_area3dCC.push_back(id.area());
+         m_ix3dCC.push_back(id.ix());
+         m_iy3dCC.push_back(id.iy());
+         m_ixx3dCC.push_back(id.ixx());
+         m_iyy3dCC.push_back(id.iyy());
+         m_zslice3dCC.push_back(id.zslice());
+         m_tslice3dCC.push_back(id.tslice());
          m_ph3dCC.push_back(round(ncer));
       }
       m_nhits3dCC = m_ph3dCC.size();
@@ -257,6 +287,16 @@ void CaloTree::EndEvent()
             ky = ky + id.iyy() + 1;
          } // 3mm SiPM
          m_id3dSS.push_back(id.ix() * 10000000 + ky * 1000 + id.tslice());
+         m_tkey3dSS.push_back(id.getTkey());
+         m_zkey3dSS.push_back(id.getZkey());
+         m_type3dSS.push_back(id.type());
+         m_area3dSS.push_back(id.area());
+         m_ix3dSS.push_back(id.ix());
+         m_iy3dSS.push_back(id.iy());
+         m_ixx3dSS.push_back(id.ixx());
+         m_iyy3dSS.push_back(id.iyy());
+         m_zslice3dSS.push_back(id.zslice());
+         m_tslice3dSS.push_back(id.tslice());
          m_ph3dSS.push_back(edepbirk);
       }
       m_nhits3dSS = m_ph3dSS.size();
@@ -314,12 +354,32 @@ void CaloTree::clearCaloTree()
 
    m_nhits3dSS = 0;
    m_id3dSS.clear();
+   m_tkey3dSS.clear();
+   m_zkey3dSS.clear();
+   m_type3dSS.clear();
+   m_area3dSS.clear();
+   m_ix3dSS.clear();
+   m_iy3dSS.clear();
+   m_ixx3dSS.clear();
+   m_iyy3dSS.clear();
+   m_zslice3dSS.clear();
+   m_tslice3dSS.clear();
    m_ph3dSS.clear();
    m_sum3dSS = 0.0;
 
    m_nhits3dCC = 0;
    //  m_ky3dCC.clear();   // this used for debugging.
    m_id3dCC.clear();
+   m_tkey3dCC.clear();
+   m_zkey3dCC.clear();
+   m_type3dCC.clear();
+   m_area3dCC.clear();
+   m_ix3dCC.clear();
+   m_iy3dCC.clear();
+   m_ixx3dCC.clear();
+   m_iyy3dCC.clear();
+   m_zslice3dCC.clear();
+   m_tslice3dCC.clear();
    m_ph3dCC.clear();
    m_sum3dCC = 0.0;
 }

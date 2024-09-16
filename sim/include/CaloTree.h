@@ -133,11 +133,31 @@ private:
 
    int m_nhits3dSS;
    vector<int> m_id3dSS;   // channel ID   xxxyyyzzz
+   vector<int> m_tkey3dSS; // T-slice
+   vector<int> m_zkey3dSS; // Z-slice
+   vector<int> m_type3dSS;
+   vector<int> m_area3dSS;
+   vector<int> m_ix3dSS;
+   vector<int> m_iy3dSS;
+   vector<int> m_ixx3dSS;
+   vector<int> m_iyy3dSS;
+   vector<int> m_zslice3dSS;
+   vector<int> m_tslice3dSS;
    vector<float> m_ph3dSS; // number of photons
    float m_sum3dSS;
 
    int m_nhits3dCC;
-   vector<int> m_id3dCC;   //  chnanel ID  xxxyyyttt
+   vector<int> m_id3dCC; //  chnanel ID  xxxyyyttt
+   vector<int> m_tkey3dCC;
+   vector<int> m_zkey3dCC;
+   vector<int> m_type3dCC;
+   vector<int> m_area3dCC;
+   vector<int> m_ix3dCC;
+   vector<int> m_iy3dCC;
+   vector<int> m_ixx3dCC;
+   vector<int> m_iyy3dCC;
+   vector<int> m_zslice3dCC;
+   vector<int> m_tslice3dCC;
    vector<float> m_ph3dCC; //  number of photons
    float m_sum3dCC;
 };
