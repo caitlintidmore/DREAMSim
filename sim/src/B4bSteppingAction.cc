@@ -77,7 +77,6 @@ B4bSteppingAction::~B4bSteppingAction()
 
 void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 {
-
   G4Track *track = step->GetTrack();
 
   // Collect energy and track length step by step
@@ -220,6 +219,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   aHit.y = posA.y() / 10.0;
   aHit.z = posA.z() / 10.0;
   aHit.pid = pdgcode;
+  aHit.calotype = caloType;
   aHit.trackid = track->GetTrackID();
   aHit.globaltime = track->GetGlobalTime();
   aHit.steplength = track->GetTrackLength();
@@ -227,8 +227,8 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   aHit.edepbirk = edep * birks / 1000.;
   if (ncer.size() > 0)
   {
-    aHit.ncer = ncer[2]; // use captured cherenkov light, instead of all, ncer[0]
-    aHit.ncercap = ncer[2];
+    aHit.ncer = ncer[0];
+    aHit.ncercap = ncer[3]; // including SiPM pde and capturing efficiency
   }
   if (skdebug > 0)
     std::cout << "skdebug (step)  5..." << std::endl;
@@ -258,12 +258,11 @@ vector<double> B4bSteppingAction::UserCerenkov(const G4Step *step)
   double n_scint = 0;
   double n_cer = 0;
   double n_cerhad = 0;
+  double nCERtotal = 0;
   double nCERlocal = 0;
   double nCERlocalElec = 0;
   double nCERlocalCap = 0;
   double nCERlocalElecCap = 0;
-
-  // cout<<"B4bSteppingAction::UserCerenkov is called..."<<endl;
 
   //  Code from examples/extended/optical/OpNovice2/src/SteppingAction.cc
   static G4ParticleDefinition *opticalphoton =
@@ -341,6 +340,8 @@ vector<double> B4bSteppingAction::UserCerenkov(const G4Step *step)
         if (abs(pvec.theta()) < 0.336)
           capture = 1; // NA=sin(theta)=0.33
 
+        nCERtotal = nCERtotal + 1;
+
         double pde = getPDE(wavelength);
         nCERlocal = nCERlocal + pde;
 
@@ -380,6 +381,7 @@ vector<double> B4bSteppingAction::UserCerenkov(const G4Step *step)
 
   // double NCER=double(n_cer)/10000.0;
   vector<double> NCER;
+  NCER.push_back(double(nCERtotal));
   NCER.push_back(double(nCERlocal));
   NCER.push_back(double(nCERlocalElec));
   NCER.push_back(double(nCERlocalCap));
