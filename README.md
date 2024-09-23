@@ -8,7 +8,14 @@ For machines with cvmfs mounted, can directly source the environment
 ```
 source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-dbg/setup.sh
 ```
-change the path according to the OS.
+Change the path according to the OS.
+
+On HPCC, everything is compiled inside the singularity environment, run
+```
+singularity run /lustre/research/hep/yofeng/SimulationEnv/alma9forgeant4_sbox
+```
+The corresponding docker image can be found [here](https://hub.docker.com/repository/docker/yongbinfeng/alma9geant/general), with the build file [here](https://github.com/TTU-HEP/SimulationEnv).
+
 
 #### Compile:
 
