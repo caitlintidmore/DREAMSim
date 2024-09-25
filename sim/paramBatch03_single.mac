@@ -7,7 +7,8 @@
 
 #$$$ rootPre       mc      (file name will be Pre+runName+runNumber+runSeq+runConfig+NoE.root)
 #$$$ createNtuple  true    (true or false))
-#$$$ miniNtuple    ture    (true of false, true to drop some objects to minimize Ntuple.)
+#$$$ miniNtuple    false    (true of false, true to drop some objects to minimize Ntuple.)
+#$$$ saveTruthHits true    (true or false)
 
 
 #$$$ gun_particle     e+      (pi+ mu+ e+ etc)
@@ -17,6 +18,8 @@
 #$$$ gun_x_max         2.50     (cm)
 #$$$ gun_y_min        -2.50     (cm)   -2.5 +/- 0.5 cm
 #$$$ gun_y_max        -2.50     (cm)
+#$$$ gun_z_min        -150.0     (cm)
+#$$$ gun_z_max        -150.0     (cm)
 
 #$$$ csvHits2dSC       0  (number of events to save 2D hits in a csv file)
 #$$$ csvHits2dCH       0

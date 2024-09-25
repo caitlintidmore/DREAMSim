@@ -74,6 +74,8 @@ private:
 
   bool createNtuple;
 
+  bool saveTruthHits;
+
   // hit data in csv file
   map<string, int> csvEvents; // number of events to be written to csv file.
   map<std::string, std::unique_ptr<std::ofstream>> fcsv;
@@ -141,10 +143,13 @@ private:
   vector<double> m_ztruth;
   vector<double> m_steplengthtruth;
   vector<double> m_globaltimetruth;
+  vector<double> m_localtimetruth;
   vector<double> m_edeptruth;
   vector<double> m_edepbirktruth;
   vector<double> m_ncertruth;
   vector<double> m_ncercaptruth;
+
+  double m_eDettruth; //  total energy deposited in the calorimeter.
 
   // scintillation hit variables
   int m_nhits3dSS;
