@@ -62,13 +62,12 @@ may be overloaded in "runBatch03_single_param.sh".
 #### Job submission on HPCC
 the script `jobs/jobSubmission.py` handles that. Run
 ```
-python jobs/jobSubmission.py
-```
-It will produce the shell scripts to submit and run the jobs on HPCC.
-```sh
+cd jobs
+python jobSubmission.py
+# It will produce the shell scripts to submit and run the jobs on HPCC.
 bash submit_all.sh
 ```
-to submit the jobs, which can then be monitored with `squeue -u $USER`.
+to submit the jobs, which can then be monitored with `squeue -u $USER`. More information on the HPCC batch system can be found [here](https://www.depts.ttu.edu/hpcc/userguides/Job_User_Guide.pdf).
 
 #### Analysis
 
