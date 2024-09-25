@@ -22,6 +22,7 @@ public:
    double z;
    double steplength;
    double globaltime;
+   double localtime;
    double edep;
    double edepbirk;
    double ncer;    // number of cerenkov photons

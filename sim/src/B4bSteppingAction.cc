@@ -221,10 +221,11 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   aHit.pid = pdgcode;
   aHit.calotype = caloType;
   aHit.trackid = track->GetTrackID();
-  aHit.globaltime = track->GetGlobalTime();
-  aHit.steplength = track->GetTrackLength();
-  aHit.edep = edep / 1000.; //  in GeV
-  aHit.edepbirk = edep * birks / 1000.;
+  aHit.globaltime = track->GetGlobalTime() / ns;
+  aHit.localtime = track->GetLocalTime() / ns;
+  aHit.steplength = track->GetTrackLength() / cm;
+  aHit.edep = edep / GeV; //  in GeV
+  aHit.edepbirk = edep * birks / GeV;
   if (ncer.size() > 0)
   {
     aHit.ncer = ncer[0];

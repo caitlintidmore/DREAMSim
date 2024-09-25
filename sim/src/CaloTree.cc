@@ -64,6 +64,10 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   eventCounts = 0;
   eventCountsALL = 0;
 
+  saveTruthHits = false;
+  if (getParamS("saveTruthHits").compare(0, 4, "true") == 0)
+    saveTruthHits = true;
+
   //  ========  root histogram, ntuple file ===========
   fout = new TFile(outRootName.c_str(), "recreate");
 
@@ -193,10 +197,13 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("ztruth", &m_ztruth);
   tree->Branch("steplength", &m_steplengthtruth);
   tree->Branch("globaltimetruth", &m_globaltimetruth);
+  tree->Branch("localtimetruth", &m_localtimetruth);
   tree->Branch("edeptruth", &m_edeptruth);
   tree->Branch("edepbirktruth", &m_edepbirktruth);
   tree->Branch("ncertruth", &m_ncertruth);
   tree->Branch("ncercaptruth", &m_ncercaptruth);
+
+  tree->Branch("eDettruth", &m_eDettruth);
 
   tree->Branch("nhits3dSS", &m_nhits3dSS);
   tree->Branch("id3dSS", &m_id3dSS);
@@ -393,10 +400,13 @@ void CaloTree::clearCaloTree()
   m_ztruth.clear();
   m_steplengthtruth.clear();
   m_globaltimetruth.clear();
+  m_localtimetruth.clear();
   m_edeptruth.clear();
   m_edepbirktruth.clear();
   m_ncertruth.clear();
   m_ncercaptruth.clear();
+
+  m_eDettruth = 0.0;
 
   m_nhits3dSS = 0;
   m_id3dSS.clear();
@@ -429,8 +439,10 @@ void CaloTree::clearCaloTree()
 // ########################################################################
 void CaloTree::accumulateHits(CaloHit ah)
 {
-  if (ah.calotype > 1)
+  m_eDettruth += ah.edep;
+  if (saveTruthHits && ah.calotype > 1)
   {
+    // save the truth hit in the scintillating and cherenkov fibers.
     m_pidtruth.push_back(ah.pid);
     m_trackidtruth.push_back(ah.trackid);
     m_calotypetruth.push_back(ah.calotype);
@@ -439,6 +451,7 @@ void CaloTree::accumulateHits(CaloHit ah)
     m_ztruth.push_back(ah.z);
     m_steplengthtruth.push_back(ah.steplength);
     m_globaltimetruth.push_back(ah.globaltime);
+    m_localtimetruth.push_back(ah.localtime);
     m_edeptruth.push_back(ah.edep);
     m_edepbirktruth.push_back(ah.edepbirk);
     m_ncertruth.push_back(ah.ncer);
@@ -538,7 +551,7 @@ void CaloTree::analyze()
     {
       edepR54 = edepR54 + edep;
     }
-  } // end of rzEdep.
+  }
 
   for (auto itr = szEdep.begin(); itr != szEdep.end(); itr++)
   {

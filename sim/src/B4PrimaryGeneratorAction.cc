@@ -175,7 +175,8 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
     double r3 = G4UniformRand();
     float x = ((hh->getParamF("gun_x_max") - hh->getParamF("gun_x_min")) * G4UniformRand() + hh->getParamF("gun_x_min")) * cm;
     float y = ((hh->getParamF("gun_y_max") - hh->getParamF("gun_y_min")) * G4UniformRand() + hh->getParamF("gun_y_min")) * cm;
-    float z = -calorimeterZHalfLength - 50.0;
+    float z = ((hh->getParamF("gun_z_max") - hh->getParamF("gun_z_min")) * G4UniformRand() + hh->getParamF("gun_z_min")) * cm;
+    // float z = -calorimeterZHalfLength - 50.0;
 
     float en = ((hh->getParamF("gun_energy_max") - hh->getParamF("gun_energy_min")) * G4UniformRand() + hh->getParamF("gun_energy_min")) * GeV;
     string ptype = hh->getParamS("gun_particle");
