@@ -59,7 +59,16 @@ Run parameters:
 - All run parameters are defined in "paramBatch03_single.mac" and
 may be overloaded in "runBatch03_single_param.sh".
 
+#### Job submission on HPCC
+the script `jobs/jobSubmission.py` handles that. Run
+```
+cd jobs
+python jobSubmission.py
+# It will produce the shell scripts to submit and run the jobs on HPCC.
+bash submit_all.sh
+```
+to submit the jobs, which can then be monitored with `squeue -u $USER`. More information on the HPCC batch system can be found [here](https://www.depts.ttu.edu/hpcc/userguides/Job_User_Guide.pdf).
 
 #### Analysis
 
-To be updated.
+The script `plotter/makePlots.py` handles this.
