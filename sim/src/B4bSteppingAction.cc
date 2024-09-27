@@ -128,12 +128,12 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     // fEventAction->FillSecondaries(step);
   }
 
-  if (charge == 0.0)
-  {
-    // not sure why..
-    return;
-  }
-  //  energy deposit in cell...
+  // if (charge == 0.0)
+  //{
+  //   // not sure why..
+  //   return;
+  // }
+  //   energy deposit in cell...
   auto touchable = step->GetPreStepPoint()->GetTouchable();
   auto depth = touchable->GetHistory()->GetDepth();
   auto thisPhysical = touchable->GetVolume(); // mother

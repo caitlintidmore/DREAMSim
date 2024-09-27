@@ -449,9 +449,10 @@ void CaloTree::clearCaloTree()
 // ########################################################################
 void CaloTree::accumulateHits(CaloHit ah)
 {
-  if (saveTruthHits && ah.calotype > 1)
+  if (saveTruthHits && ah.calotype > 1 && ah.edep >= 1.0e-6)
   {
     // save the truth hit in the scintillating and cherenkov fibers.
+    // larger than 1 eV
     m_pidtruth.push_back(ah.pid);
     m_trackidtruth.push_back(ah.trackid);
     m_calotypetruth.push_back(ah.calotype);
