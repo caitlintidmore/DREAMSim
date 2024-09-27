@@ -20,10 +20,10 @@ print("Current directory: ", current_dir)
 #
 sim_build_dir = f"{current_dir}/../sim/build"
 log_dir = f"{current_dir}/log"
-njobs = 10
-nevents_per_job = 1
+njobs = 50
+nevents_per_job = 20
 runnumber = 100
-particle = "pi+"
+particle = "e+"
 energy_min = 100
 energy_max = 101
 jobname_prefix = "dreamsim"
