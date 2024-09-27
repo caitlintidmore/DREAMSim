@@ -85,12 +85,9 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   static G4ParticleDefinition *opticalphoton =
       G4OpticalPhoton::OpticalPhotonDefinition();
 
-  G4StepPoint *endPoint = step->GetPostStepPoint();
-  G4StepPoint *startPoint = step->GetPreStepPoint();
-
-  const G4DynamicParticle *theParticle = track->GetDynamicParticle();
+  const G4DynamicParticle *dynamicParticle = track->GetDynamicParticle();
   const G4ParticleDefinition *particleDef =
-      theParticle->GetParticleDefinition();
+      dynamicParticle->GetParticleDefinition();
 
   if (particleDef == opticalphoton)
   {
@@ -104,19 +101,13 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   // auto volume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
 
   // energy deposit
+  // edep does not include energy transfrerred to 2ndaries.
+  // https://geant4-forum.web.cern.ch/t/total-energy-and-total-energy-deposit/6936/8
   auto edep = step->GetTotalEnergyDeposit();
-  double charge = step->GetTrack()->GetDefinition()->GetPDGCharge();
+  double charge = track->GetDefinition()->GetPDGCharge();
 
-  // step length
-  G4double stepLength = 0.;
-  if (step->GetTrack()->GetDefinition()->GetPDGCharge() != 0.)
-  {
-    stepLength = step->GetStepLength();
-  }
+  G4TrackStatus tkstatus = track->GetTrackStatus();
 
-  G4TrackStatus tkstatus = step->GetTrack()->GetTrackStatus();
-
-  const G4DynamicParticle *dynamicParticle = track->GetDynamicParticle();
   G4int pdgcode = dynamicParticle->GetPDGcode();
   // G4int absPdgCode=abs(pdgcode);
   G4ParticleDefinition *particle = dynamicParticle->GetDefinition();
@@ -138,12 +129,10 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   }
 
   if (charge == 0.0)
+  {
+    // not sure why..
     return;
-
-  int skdebug = 0;
-  if (skdebug > 0)
-    std::cout << "skdebug (step)  1..." << std::endl;
-
+  }
   //  energy deposit in cell...
   auto touchable = step->GetPreStepPoint()->GetTouchable();
   auto depth = touchable->GetHistory()->GetDepth();
@@ -175,9 +164,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     // layerReplicaNumber=touchable->GetReplicaNumber(4);
   }
 
-  if (skdebug > 0)
-    std::cout << "skdebug (step)  2..." << std::endl;
-
   if (thisName.compare(0, 18, "fiberCoreScintPhys") == 0)
   {
     caloType = 2;
@@ -188,8 +174,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     caloType = 3;
     ncer = UserCerenkov(step); // cerenkov photons;
   }
-  if (skdebug > 0)
-    std::cout << "skdebug (step)  3..." << std::endl;
 
   if (caloType == 2 || caloType == 3)
   {
@@ -201,8 +185,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     // rodReplicaNumber=touchable->GetReplicaNumber(3);
     // layerReplicaNumber=touchable->GetReplicaNumber(4);
   }
-  if (skdebug > 0)
-    std::cout << "skdebug (step)  4..." << std::endl;
   // std::cout<<"Stepping Action: depth "<<depth<<"  volume "<<thisName<<"  copy no "<<thisCopyNo;
   // std::cout<<" calotype "<<caloType;
   // std::cout<<" f "<<fiberNumber;
@@ -215,9 +197,9 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 
   CaloHit aHit;
   aHit.caloid = caloid;
-  aHit.x = posA.x() / 10.0; // in cm
-  aHit.y = posA.y() / 10.0;
-  aHit.z = posA.z() / 10.0;
+  aHit.x = posA.x() / cm; // in cm
+  aHit.y = posA.y() / cm;
+  aHit.z = posA.z() / cm;
   aHit.pid = pdgcode;
   aHit.calotype = caloType;
   aHit.trackid = track->GetTrackID();
@@ -231,8 +213,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     aHit.ncer = ncer[0];
     aHit.ncercap = ncer[3]; // including SiPM pde and capturing efficiency
   }
-  if (skdebug > 0)
-    std::cout << "skdebug (step)  5..." << std::endl;
 
   // aHit.print();
 
@@ -247,9 +227,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   // fEventAction->StepAnalysisSensor(step,ncer);   // analysis for the sensor volume.
 
   // fEventAction->StepAnalysis(step,ncer[0],ncer[1]);   // in original sim. Moved to above.
-  if (skdebug > 0)
-    std::cout << "skdebug (step)  6..." << std::endl;
-
 } // end of B4bSteppingAction::UserSteppingAction.
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
