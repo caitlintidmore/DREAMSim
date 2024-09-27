@@ -467,8 +467,8 @@ def DrawHistos(myhistos, mylabels, xmin, xmax, xlabel, ymin, ymax, ylabel, outpu
 
     # change the CMS_lumi variables (see CMS_lumi.py)
     # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-    CMS_lumi.lumi_sqrtS = "(13 TeV)"
-    CMS_lumi.relPosX = 0.12
+    CMS_lumi.lumi_sqrtS = ""
+    CMS_lumi.relPosX = 0.16
     # CMS_lumi.extraText = "Internal"
     CMS_lumi.extraText = ""
     if MCOnly:

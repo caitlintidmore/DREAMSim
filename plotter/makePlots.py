@@ -10,13 +10,11 @@ all_files = OrderedDict()
 all_files['ele'] = OrderedDict()
 all_files['pion'] = OrderedDict()
 
-all_files['pion']['10GeV'] = "/afs/cern.ch/work/y/yofeng/public/CaloX/outputs/mc_testjob_run002_003_Test_100evt_pi+_10.0_10.0.root"
-all_files['pion']['100GeV'] = "/afs/cern.ch/work/y/yofeng/public/CaloX/outputs/mc_testjob_run002_003_Test_100evt_pi+_100.0_100.0.root"
-all_files['ele']['10GeV'] = "/afs/cern.ch/work/y/yofeng/public/CaloX/outputs/mc_testjob_run001_003_Test_100evt_e+_10.0_10.0.root"
-all_files['ele']['100GeV'] = "/afs/cern.ch/work/y/yofeng/public/CaloX/outputs/mc_testjob_run001_003_Test_100evt_e+_100.0_100.0.root"
+all_files['pion']['100GeV'] = "/home/yofeng/CaloX/DREAMSim/sim/build/mc_testjob_run001_003_Test_100evt_pi+_100.0_100.0.root"
+all_files['ele']['100GeV'] = "/home/yofeng/CaloX/DREAMSim/sim/build/mc_testjob_run001_003_Test_100evt_e+_100.0_100.0.root"
 
 particles = ['ele', 'pion']
-energies = ['10GeV', '100GeV']
+energies = ['100GeV']
 
 files = OrderedDict()
 trees = OrderedDict()
@@ -27,9 +25,14 @@ for part in particles:
         files[part][ene] = ROOT.TFile.Open(all_files[part][ene])
         trees[part][ene] = files[part][ene].Get("tree").Clone()
 
+leakageene_fracs = OrderedDict()
 ene_fracs = OrderedDict()
 eneC_fracs = OrderedDict()
 eneS_fracs = OrderedDict()
+
+hists_gt_weighted = OrderedDict()
+hists_gt_C_weighted = OrderedDict()
+hists_gt_S_weighted = OrderedDict()
 
 hists_z = OrderedDict()
 hists_z_C = OrderedDict()
@@ -44,7 +47,9 @@ hists_z_C_weighted = OrderedDict()
 hists_z_S_weighted = OrderedDict()
 
 particles = ['ele', 'pion']
-energies = ['10GeV']
+energies = ['100GeV']
+
+nevts = 5
 
 for part in particles:
     for ene in energies:
@@ -59,36 +64,49 @@ for part in particles:
         
         print("file: " + all_files[part][ene])
         print("Filling " + str)
-        trees[part][ene].Draw(f"Sum$(edeptruth*(calotypetruth==2 || calotypetruth==3)) / {e} >> {ene_fracs[str].GetName()}")
-        trees[part][ene].Draw(f"Sum$(edeptruth*(calotypetruth==3)) / {e} >> {eneC_fracs[str].GetName()}")
-        trees[part][ene].Draw(f"Sum$(edeptruth*(calotypetruth==2)) / {e} >> {eneS_fracs[str].GetName()}")
+        trees[part][ene].Draw(f"Sum$(edeptruth*(calotypetruth==2 || calotypetruth==3)) / {e} >> {ene_fracs[str].GetName()}", "", "", nevts)
+        trees[part][ene].Draw(f"Sum$(edeptruth*(calotypetruth==3)) / {e} >> {eneC_fracs[str].GetName()}", "", "", nevts)
+        trees[part][ene].Draw(f"Sum$(edeptruth*(calotypetruth==2)) / {e} >> {eneS_fracs[str].GetName()}", "", "", nevts)
+        
+        hname = "leakageenergyfrac_" + str
+        leakageene_fracs[str] = ROOT.TH1F(hname, hname, 100, 0, 0.4)
+        trees[part][ene].Draw(f"(1- eDettruth / {e}) >>  {leakageene_fracs[str].GetName()}")
+        
+        hname = "globaltime_" + str
+        hists_gt_weighted[str] = ROOT.TH1F(hname + "_gt_weighted", hname + "_gt_weighted", 100, 0, 50.0)
+        hists_gt_C_weighted[str] = ROOT.TH1F(hname + "_C_gt_weighted", hname + "_C_gt_weighted", 100, 0, 50.0)
+        hists_gt_S_weighted[str] = ROOT.TH1F(hname + "_S_gt_weighted", hname + "_S_gt_weighted", 100, 0, 50.0)
+        
+        trees[part][ene].Draw("globaltimetruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_gt_weighted[str].GetName(), "edeptruth", "", nevts)
+        trees[part][ene].Draw("globaltimetruth*(calotypetruth==3)>> " + hists_gt_C_weighted[str].GetName(), "edeptruth", "", nevts)
+        trees[part][ene].Draw("globaltimetruth*(calotypetruth==2)>> " + hists_gt_S_weighted[str].GetName(), "edeptruth", "", nevts)
         
         hname = "zdistance_" + str
         hists_z[str] = ROOT.TH1F(hname + "_z", hname + "_z", 100, -100., 100.0)
         hists_z_C[str] = ROOT.TH1F(hname + "_C_z", hname + "_C_z", 100, -100., 100.0)
         hists_z_S[str] = ROOT.TH1F(hname + "_S_z", hname + "_S_z", 100, -100., 100.0)
         
-        trees[part][ene].Draw("ztruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_z[str].GetName())
-        trees[part][ene].Draw("ztruth*(calotypetruth==3)>> " + hists_z_C[str].GetName())
-        trees[part][ene].Draw("ztruth*(calotypetruth==2)>> " + hists_z_S[str].GetName())
+        trees[part][ene].Draw("ztruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_z[str].GetName(), "", "", nevts)
+        trees[part][ene].Draw("ztruth*(calotypetruth==3)>> " + hists_z_C[str].GetName(), "", "", nevts)
+        trees[part][ene].Draw("ztruth*(calotypetruth==2)>> " + hists_z_S[str].GetName(), "", "", nevts)
         
         hname = "xdistance_" + str
         hists_x[str] = ROOT.TH1F(hname + "_x", hname + "_x", 100, -15., 15.0)
         hists_x_C[str] = ROOT.TH1F(hname + "_C_x", hname + "_C_x", 100, -15., 15.0)
         hists_x_S[str] = ROOT.TH1F(hname + "_S_x", hname + "_S_x", 100, -15., 15.0)
         
-        trees[part][ene].Draw("xtruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_x[str].GetName())
-        trees[part][ene].Draw("xtruth*(calotypetruth==3)>> " + hists_x_C[str].GetName())
-        trees[part][ene].Draw("xtruth*(calotypetruth==2)>> " + hists_x_S[str].GetName())
+        trees[part][ene].Draw("xtruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_x[str].GetName(), "", "", nevts)
+        trees[part][ene].Draw("xtruth*(calotypetruth==3)>> " + hists_x_C[str].GetName(), "", "", nevts)
+        trees[part][ene].Draw("xtruth*(calotypetruth==2)>> " + hists_x_S[str].GetName(), "", "", nevts)
         
         hname = "zdistance_weighted_" + str
         hists_z_weighted[str] = ROOT.TH1F(hname + "_z_weighted", hname + "_z_weighted", 100, -100., 100.0)
         hists_z_C_weighted[str] = ROOT.TH1F(hname + "_C_z_weighted", hname + "_C_z_weighted", 100, -100., 100.0)
         hists_z_S_weighted[str] = ROOT.TH1F(hname + "_S_z_weighted", hname + "_S_z_weighted", 100, -100., 100.0)
         
-        trees[part][ene].Draw("ztruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_z_weighted[str].GetName(), "edeptruth")
-        trees[part][ene].Draw("ztruth*(calotypetruth==3)>> " + hists_z_C_weighted[str].GetName(), "edeptruth")
-        trees[part][ene].Draw("ztruth*(calotypetruth==2)>> " + hists_z_S_weighted[str].GetName(), "edeptruth")
+        trees[part][ene].Draw("ztruth*(calotypetruth==2 || calotypetruth==3)>> " + hists_z_weighted[str].GetName(), "edeptruth", "", nevts)
+        trees[part][ene].Draw("ztruth*(calotypetruth==3)>> " + hists_z_C_weighted[str].GetName(), "edeptruth", "", nevts)
+        trees[part][ene].Draw("ztruth*(calotypetruth==2)>> " + hists_z_S_weighted[str].GetName(), "edeptruth", "", nevts)
         
         
 colormaps ={
@@ -130,6 +148,8 @@ DrawHistos(list(eneC_fracs.values()), list(eneC_fracs.keys()), 0, 0.05, "Fractio
 
 DrawHistos(list(eneS_fracs.values()), list(eneS_fracs.keys()), 0, 0.05, "Fraction of energy", 1e-3, 1e2, "Fraction of events", "eneS_frac", **args)
 
+DrawHistos(list(leakageene_fracs.values()), list(leakageene_fracs.keys()), 0, 0.4, "Fraction of energy", 1e-3, 1e2, "Fraction of events", "leakageene_frac", **args)
+
 DrawHistos(list(hists_z.values()), list(hists_z.keys()), -100, 100, "z [cm]", 1e-6, 1e4, "Fraction of events", "z", **args)
 DrawHistos(list(hists_z_C.values()), list(hists_z_C.keys()), -100, 100, "z [cm]", 1e-6, 1e4, "Fraction of events", "z_C", **args)
 DrawHistos(list(hists_z_S.values()), list(hists_z_S.keys()), -100, 100, "z [cm]", 1e-6, 1e4, "Fraction of events", "z_S", **args)
@@ -140,6 +160,11 @@ DrawHistos(list(hists_x_S.values()), list(hists_x_S.keys()), -15, 15, "x [cm]", 
 
 
 args['donormalize'] = False
+args['addOverflow'] = True
+args['addUnderflow'] = True
 DrawHistos(list(hists_z_weighted.values()), list(hists_z_weighted.keys()), -100, 100, "z [cm]", 1e-6, 1e4, "Fraction of events", "z_weighted", **args)
 DrawHistos(list(hists_z_C_weighted.values()), list(hists_z_C_weighted.keys()), -100, 100, "z [cm]", 1e-6, 1e4, "Fraction of events", "z_C_weighted", **args)
 DrawHistos(list(hists_z_S_weighted.values()), list(hists_z_S_weighted.keys()), -100, 100, "z [cm]", 1e-6, 1e4, "Fraction of events", "z_S_weighted", **args)
+DrawHistos(list(hists_gt_weighted.values()), list(hists_gt_weighted.keys()), 0, 50, "Time [ns]", 1e-6, 1e4, "Fraction of events", "gt_weighted", **args)
+DrawHistos(list(hists_gt_C_weighted.values()), list(hists_gt_C_weighted.keys()), 0, 50, "Time [ns]", 1e-6, 1e4, "Fraction of events", "gt_C_weighted", **args)
+DrawHistos(list(hists_gt_S_weighted.values()), list(hists_gt_S_weighted.keys()), 0, 50, "Time [ns]", 1e-6, 1e4, "Fraction of events", "gt_S_weighted", **args)
