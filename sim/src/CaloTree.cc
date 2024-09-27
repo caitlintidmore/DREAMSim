@@ -203,7 +203,12 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("ncertruth", &m_ncertruth);
   tree->Branch("ncercaptruth", &m_ncercaptruth);
 
-  tree->Branch("eDettruth", &m_eDettruth);
+  tree->Branch("eCalotruth", &m_eCalotruth);
+  tree->Branch("eWorldtruth", &m_eWorldtruth);
+  tree->Branch("eLeaktruth", &m_eLeaktruth);
+  tree->Branch("eRodtruth", &m_eRodtruth);
+  tree->Branch("eCentruth", &m_eCentruth);
+  tree->Branch("eScintruth", &m_eScintruth);
 
   tree->Branch("nhits3dSS", &m_nhits3dSS);
   tree->Branch("id3dSS", &m_id3dSS);
@@ -406,7 +411,12 @@ void CaloTree::clearCaloTree()
   m_ncertruth.clear();
   m_ncercaptruth.clear();
 
-  m_eDettruth = 0.0;
+  m_eCalotruth = 0.0;
+  m_eWorldtruth = 0.0;
+  m_eLeaktruth = 0.0;
+  m_eRodtruth = 0.0;
+  m_eCentruth = 0.0;
+  m_eScintruth = 0.0;
 
   m_nhits3dSS = 0;
   m_id3dSS.clear();
@@ -439,7 +449,6 @@ void CaloTree::clearCaloTree()
 // ########################################################################
 void CaloTree::accumulateHits(CaloHit ah)
 {
-  m_eDettruth += ah.edep;
   if (saveTruthHits && ah.calotype > 1)
   {
     // save the truth hit in the scintillating and cherenkov fibers.
@@ -504,6 +513,22 @@ void CaloTree::accumulateHits(CaloHit ah)
   // mNxCell=0;
   // mNyCell=0;
   // mHepPy.clear();     // GeV
+}
+
+void CaloTree::accumulateEnergy(double edep, int type = 0)
+{
+  if (type == -99)
+    m_eLeaktruth += edep;
+  if (type == -1)
+    m_eWorldtruth += edep;
+  if (type >= 0)
+    m_eCalotruth += edep;
+  if (type == 1)
+    m_eRodtruth += edep;
+  if (type == 2)
+    m_eScintruth += edep;
+  if (type == 3)
+    m_eCentruth += edep;
 }
 
 // ########################################################################

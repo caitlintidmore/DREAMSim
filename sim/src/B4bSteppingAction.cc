@@ -152,6 +152,22 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   // int holeReplicaNumber=0;
   // int rodReplicaNumber=0;
   // int  layerReplicaNumber=0;
+
+  // goes outside the world volume
+  // condition taken from https://github.com/Geant4/geant4/blob/v11.2.2/examples/advanced/lAr_calorimeter/src/FCALSteppingAction.cc#L185
+  if (track->GetNextVolume() == 0)
+  {
+    // std::cout<<"Stepping Action:  track goes outside the world volume"<<std::endl;
+    double eLeak = step->GetPostStepPoint()->GetKineticEnergy();
+    hh->accumulateEnergy(eLeak / GeV, -99);
+  }
+
+  if (thisName.compare(0, 5, "World") == 0)
+  {
+    // outside the volume
+    caloType = -1;
+  }
+
   if (thisName.compare(0, 3, "Rod") == 0)
   {
     caloType = 1;
@@ -163,7 +179,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     // rodReplicaNumber=touchable->GetReplicaNumber(3);
     // layerReplicaNumber=touchable->GetReplicaNumber(4);
   }
-
   if (thisName.compare(0, 18, "fiberCoreScintPhys") == 0)
   {
     caloType = 2;
@@ -192,6 +207,8 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   // std::cout<<" r "<<rodNumber<<" lyr "<<layerNumber;
   //  std::cout<<" "<<std::endl;
   // std::cout<<" replicas "<<holeReplicaNumber<<"  "<<rodReplicaNumber<<"  "<<layerReplicaNumber<<std::endl;
+
+  hh->accumulateEnergy(edep / GeV, caloType);
 
   CaloID caloid(caloType, fiberNumber, layerNumber, rodNumber, posA.z(), track->GetGlobalTime());
 

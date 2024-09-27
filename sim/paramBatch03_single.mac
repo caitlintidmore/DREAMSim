@@ -18,8 +18,8 @@
 #$$$ gun_x_max         2.50     (cm)
 #$$$ gun_y_min        -2.50     (cm)   -2.5 +/- 0.5 cm
 #$$$ gun_y_max        -2.50     (cm)
-#$$$ gun_z_min        -150.0     (cm)
-#$$$ gun_z_max        -150.0     (cm)
+#$$$ gun_z_min        -105.0     (cm)
+#$$$ gun_z_max        -105.0     (cm)
 
 #$$$ csvHits2dSC       0  (number of events to save 2D hits in a csv file)
 #$$$ csvHits2dCH       0

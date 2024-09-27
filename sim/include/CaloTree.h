@@ -38,6 +38,7 @@ public:
 
   //  called fro SteppingAction...
   void accumulateHits(CaloHit aHit);
+  void accumulateEnergy(double eleak, int type);
   void saveBeamXYZE(string, int, float, float, float, float);
 
   // for histogrming...
@@ -149,7 +150,12 @@ private:
   vector<double> m_ncertruth;
   vector<double> m_ncercaptruth;
 
-  double m_eDettruth; //  total energy deposited in the calorimeter.
+  double m_eCalotruth;
+  double m_eWorldtruth;
+  double m_eLeaktruth;
+  double m_eRodtruth;
+  double m_eCentruth;
+  double m_eScintruth;
 
   // scintillation hit variables
   int m_nhits3dSS;
