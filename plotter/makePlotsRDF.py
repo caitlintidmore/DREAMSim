@@ -60,6 +60,14 @@ figures = ['eLeaktruth', 'eCalotruth', 'eTotaltruth',
            'time', 'time_zoomed',
            'xtruth_vs_ytruth', 'xtruth_vs_ztruth', 'rtruth_vs_ztruth',
            'time_vs_ztruth', 'time_vs_rtruth']
+evtlist = [1, 10, 20, 30, 40, 100, 200]
+for i in evtlist:
+    figures.append(f"event_{i}_xtruth_vs_ytruth")
+    figures.append(f"event_{i}_xtruth_vs_ztruth")
+    figures.append(f"event_{i}_rtruth_vs_ztruth")
+    figures.append(f"event_{i}_time_vs_ztruth")
+    figures.append(f"event_{i}_time_vs_rtruth")
+
 for fig in figures:
     histos[fig] = OrderedDict()
 
@@ -80,15 +88,25 @@ for part, rdf in rdfs.items():
     histos['ztruth'][part] = rdf.Histo1D(("ztruth" + suffix, "ztruth", 100, -100, 100), "ztruth", "eweight")
     histos['rtruth'][part] = rdf.Histo1D(("rtruth" + suffix, "rtruth", 50, 0, 30), "rtruth", "eweight")
     
-    histos['time'][part] = rdf.Histo1D(("time" + suffix, "time", 50, 0, 100), "globaltimetruth", "eweight")
+    histos['time'][part] = rdf.Histo1D(("time" + suffix, "time", 50, 0, 50), "globaltimetruth", "eweight")
     histos['time_zoomed'][part] = rdf.Histo1D(("time_zoomed" + suffix, "time_zoomed", 50, 0, 10), "globaltimetruth", "eweight")
     
     histos['xtruth_vs_ytruth'][part] = rdf.Histo2D(("xtruth_vs_ytruth" + suffix, "xtruth_vs_ytruth", 50, -20, 20, 50, -20, 20), "xtruth", "ytruth", "eweight")
     histos['xtruth_vs_ztruth'][part] = rdf.Histo2D(("xtruth_vs_ztruth" + suffix, "xtruth_vs_ztruth", 50, -20, 20, 100, -100, 100), "xtruth", "ztruth", "eweight")
     histos['rtruth_vs_ztruth'][part] = rdf.Histo2D(("rtruth_vs_ztruth" + suffix, "rtruth_vs_ztruth", 50, 0, 30, 100, -100, 100), "rtruth", "ztruth", "eweight")
     
-    histos['time_vs_ztruth'][part] = rdf.Histo2D(("time_vs_ztruth" + suffix, "time_vs_ztruth", 50, 0, 100, 100, -100, 100), "globaltimetruth", "ztruth", "eweight")
-    histos['time_vs_rtruth'][part] = rdf.Histo2D(("time_vs_rtruth" + suffix, "time_vs_rtruth", 50, 0, 100, 50, 0, 30), "globaltimetruth", "rtruth", "eweight")
+    histos['time_vs_ztruth'][part] = rdf.Histo2D(("time_vs_ztruth" + suffix, "time_vs_ztruth", 50, 0, 20, 100, -100, 100), "globaltimetruth", "ztruth", "eweight")
+    histos['time_vs_rtruth'][part] = rdf.Histo2D(("time_vs_rtruth" + suffix, "time_vs_rtruth", 50, 0, 20, 50, 0, 30), "globaltimetruth", "rtruth", "eweight")
+    
+    # some event displays
+    for i in evtlist:
+        rdf_event = rdf.Filter(f"rdfentry_ == {i}")
+        histos[f"event_{i}_xtruth_vs_ytruth"][part] = rdf_event.Histo2D((f"event_{i}_xtruth_vs_ytruth" + suffix, f"event_{i}_xtruth_vs_ytruth", 50, -20, 20, 50, -20, 20), "xtruth", "ytruth", "eweight")
+        histos[f"event_{i}_xtruth_vs_ztruth"][part] = rdf_event.Histo2D((f"event_{i}_xtruth_vs_ztruth" + suffix, f"event_{i}_xtruth_vs_ztruth", 50, -20, 20, 100, -100, 100), "xtruth", "ztruth", "eweight")
+        histos[f"event_{i}_rtruth_vs_ztruth"][part] = rdf_event.Histo2D((f"event_{i}_rtruth_vs_ztruth" + suffix, f"event_{i}_rtruth_vs_ztruth", 50, 0, 30, 100, -100, 100), "rtruth", "ztruth", "eweight")
+        
+        histos[f"event_{i}_time_vs_ztruth"][part] = rdf_event.Histo2D((f"event_{i}_time_vs_ztruth" + suffix, f"event_{i}_time_vs_ztruth", 50, 0, 20, 100, -100, 100), "globaltimetruth", "ztruth", "eweight")
+        histos[f"event_{i}_time_vs_rtruth"][part] = rdf_event.Histo2D((f"event_{i}_time_vs_rtruth" + suffix, f"event_{i}_time_vs_rtruth", 50, 0, 20, 50, 0, 30), "globaltimetruth", "rtruth", "eweight")
     
     
 colormaps ={
@@ -140,7 +158,17 @@ for part in rdfs.keys():
     DrawHistos([histos['xtruth_vs_ztruth'][part]], [], -20, 20, "x [cm]", -100, 100, "z [cm]", f"xtruth_vs_ztruth_{part}", **args)
     DrawHistos([histos['rtruth_vs_ztruth'][part]], [], 0, 30, "r [cm]", -100, 100, "z [cm]", f"rtruth_vs_ztruth_{part}", **args)    
     
-    DrawHistos([histos['time_vs_ztruth'][part]], [], 0, 100, "Time [ns]", -100, 100, "z [cm]", f"time_vs_ztruth_{part}", **args)
-    DrawHistos([histos['time_vs_rtruth'][part]], [], 0, 100, "Time [ns]", 0, 30, "r [cm]", f"time_vs_rtruth_{part}", **args)
+    DrawHistos([histos['time_vs_ztruth'][part]], [], 0, 20, "Time [ns]", -100, 100, "z [cm]", f"time_vs_ztruth_{part}", **args)
+    DrawHistos([histos['time_vs_rtruth'][part]], [], 0, 20, "Time [ns]", 0, 30, "r [cm]", f"time_vs_rtruth_{part}", **args)
+    
+    # event displays
+    for i in evtlist:
+        DrawHistos([histos[f"event_{i}_xtruth_vs_ytruth"][part]], [], -20, 20, "x [cm]", -20, 20, "y [cm]", f"event_{i}_xtruth_vs_ytruth_{part}", **args)
+        DrawHistos([histos[f"event_{i}_xtruth_vs_ztruth"][part]], [], -20, 20, "x [cm]", -100, 100, "z [cm]", f"event_{i}_xtruth_vs_ztruth_{part}", **args)
+        DrawHistos([histos[f"event_{i}_rtruth_vs_ztruth"][part]], [], 0, 30, "r [cm]", -100, 100, "z [cm]", f"event_{i}_rtruth_vs_ztruth_{part}", **args)
+        
+        DrawHistos([histos[f"event_{i}_time_vs_ztruth"][part]], [], 0, 20, "Time [ns]", -100, 100, "z [cm]", f"event_{i}_time_vs_ztruth_{part}", **args)
+        DrawHistos([histos[f"event_{i}_time_vs_rtruth"][part]], [], 0, 20, "Time [ns]", 0, 30, "r [cm]", f"event_{i}_time_vs_rtruth_{part}", **args)
+        
 
 print("Done")

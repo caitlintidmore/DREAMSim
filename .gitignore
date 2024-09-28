@@ -1,0 +1,4 @@
+sim/build/
+*__pycache__*
+*/log/*
+*root

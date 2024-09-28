@@ -71,4 +71,13 @@ to submit the jobs, which can then be monitored with `squeue -u $USER`. More inf
 
 #### Analysis
 
-The script `plotter/makePlots.py` handles this.
+The script `plotter/makePlotsRDF.py` handles this. It runs on multithreads with ROOT's RDataFrame. Therefore, from the login node, log to an interactive node with mutliple cores, e.g.
+```
+interactive -p nocona -c 4
+```
+Then run the script
+```
+cd plotter
+python makePlotsRDF.py
+```
+under the singularity environment.
