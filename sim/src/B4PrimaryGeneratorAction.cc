@@ -180,6 +180,9 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 
     float en = ((hh->getParamF("gun_energy_max") - hh->getParamF("gun_energy_min")) * G4UniformRand() + hh->getParamF("gun_energy_min")) * GeV;
     string ptype = hh->getParamS("gun_particle");
+    float px = (hh->getParamF("pMomentum_x"));
+    float py = (hh->getParamF("pMomentum_y"));
+    float pz = (hh->getParamF("pMomentum_z"));
 
     G4int nofParticles = 1;
     fParticleGun = new G4ParticleGun(nofParticles);
@@ -188,7 +191,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
     fParticleGun->SetParticleDefinition(particleDefinition);
     fParticleGun->SetParticlePosition(G4ThreeVector(x, y, z));
     fParticleGun->SetParticleEnergy(en);
-    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.0, 0.0, 1.0));
+    fParticleGun->SetParticleMomentumDirection(G4ThreeVector(px, py, pz));
     fParticleGun->GeneratePrimaryVertex(anEvent);
     // cout<<"B4PrimaryGeneratorAction::GeneratePrimaries set a particle..."<<endl;
     // cout<<"   (x,y,z,en)="<<x<<",  "<<y<<",  "<<z<<",  "<<en<<",  "<<ptype<<endl;
