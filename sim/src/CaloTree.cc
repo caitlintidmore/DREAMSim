@@ -93,11 +93,6 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   histo1D["edepS54wt1"] =
       new TH1D("edepS54wt1", "edep (54x54) wt=1 (Sci)", nx, xmin, xmax);
 
-  histo1D["edepS54"] =
-      new TH1D("edepS54", "edep (54x54) (Sci)", nx, xmin, xmax);
-  histo1D["edepS54wt1"] =
-      new TH1D("edepS54wt1", "edep (54x54) wt=1 (Sci)", nx, xmin, xmax);
-
   histo1D["edepC54"] =
       new TH1D("edepC54", "edep (54x54) (Cher)", nx, xmin, xmax);
   histo1D["edepC54wt1"] =
