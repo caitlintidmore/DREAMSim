@@ -39,6 +39,7 @@
 
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Positron.hh"
 
 #include "CaloID.h"  // including CaloID, CaloHit, CaloTree
 #include "CaloHit.h" // including CaloID, CaloHit, CaloTree
@@ -91,7 +92,6 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 
   if (particleDef == opticalphoton)
   {
-    // cout<<"this is an optical photon.  Need to stop it"<<endl;
     track->SetTrackStatus(fStopAndKill);
     return;
   }
@@ -123,10 +123,10 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   // if(tkstatus==fStopAndKill && absPdgCode>100 && track->GetTrackID()==1) {
   // if(tkstatus==fStopAndKill && absPdgCode>100) {
   // save secondaries from hadronic interactions and photon/lepton DIS...
-  if (tkstatus == fStopAndKill)
-  {
-    // fEventAction->FillSecondaries(step);
-  }
+  // if (tkstatus == fStopAndKill)
+  //{
+  //  // fEventAction->FillSecondaries(step);
+  //}
 
   // if (charge == 0.0)
   //{
@@ -159,7 +159,43 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   {
     // std::cout<<"Stepping Action:  track goes outside the world volume"<<std::endl;
     double eLeak = step->GetPostStepPoint()->GetKineticEnergy();
+    if (particle == G4Positron::Positron())
+    {
+      eLeak += 2 * electron_mass_c2;
+    }
     hh->accumulateEnergy(eLeak / GeV, -99);
+  }
+
+  double e_lost = 0.0;
+  bool addPositronMass = false;
+  const std::vector<const G4Track *> *secondaries = step->GetSecondaryInCurrentStep();
+  for (auto sec : *secondaries)
+  {
+    e_lost += sec->GetKineticEnergy();
+    if (particle != G4Positron::Positron() && sec->GetParticleDefinition() == G4Positron::Positron())
+    {
+      e_lost += 2 * electron_mass_c2;
+      addPositronMass = true;
+    }
+  }
+  double e_change = step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy() - e_lost - edep;
+  hh->accumulateDeposits(edep / GeV, step->GetTrack()->GetCurrentStepNumber());
+  if (fabs(e_change) >= 3 * electron_mass_c2)
+  {
+    std::cout << "Step number: " << step->GetTrack()->GetCurrentStepNumber()
+              << ", Particle name: " << particleName
+              << ", Number of secondaries: " << secondaries->size()
+              << ", Energy change: MeV " << e_change / MeV
+              << ", Energy lost to secondaries: " << e_lost
+              << ", Energy deposited: " << edep
+              << ", Delta energy: " << step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy()
+              << ", Pre-step position: (" << step->GetPreStepPoint()->GetPosition().x() << ", " << step->GetPreStepPoint()->GetPosition().y() << ", " << step->GetPreStepPoint()->GetPosition().z() << ")"
+              << ", Post-step position: (" << step->GetPostStepPoint()->GetPosition().x() << ", " << step->GetPostStepPoint()->GetPosition().y() << ", " << step->GetPostStepPoint()->GetPosition().z() << ")"
+              << ", Pre-step time: " << step->GetPreStepPoint()->GetGlobalTime()
+              << ", Post-step time: " << step->GetPostStepPoint()->GetGlobalTime()
+              << ", Pre-step momentum: (" << step->GetPreStepPoint()->GetMomentum().x() << ", " << step->GetPreStepPoint()->GetMomentum().y() << ", " << step->GetPreStepPoint()->GetMomentum().z() << ")"
+              << ", Post-step momentum: (" << step->GetPostStepPoint()->GetMomentum().x() << ", " << step->GetPostStepPoint()->GetMomentum().y() << ", " << step->GetPostStepPoint()->GetMomentum().z() << ")"
+              << std::endl;
   }
 
   if (thisName.compare(0, 5, "World") == 0)

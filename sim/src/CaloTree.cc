@@ -21,6 +21,7 @@
 #include "TPaveText.h"
 #include "TText.h"
 #include "TTree.h"
+#include <numeric>
 
 #include "CaloHit.h"
 #include "CaloID.h"
@@ -343,6 +344,13 @@ void CaloTree::EndEvent()
     m_nhitstruth = m_pidtruth.size();
     //
     tree->Fill();
+    std::cout << "Look into energy deposition in the calorimeter..." << std::endl;
+    std::cout << " total absolute energy deposits " << std::accumulate(m_eDEPs.begin(), m_eDEPs.end(), 0.0) << std::endl;
+    for (int i = 0; i < 200; i++)
+    {
+      if (m_eDEPs[i] > 0.0)
+        std::cout << "  i=" << i << "  eDEP=" << m_eDEPs[i] << std::endl;
+    }
   } //  end of if((eventCounts-1)<getParamI("eventsInNtupe"))
 
   //   analyze this event.
@@ -412,6 +420,12 @@ void CaloTree::clearCaloTree()
   m_eRodtruth = 0.0;
   m_eCentruth = 0.0;
   m_eScintruth = 0.0;
+
+  m_eDEPs.clear();
+  for (unsigned int i = 0; i < 200; i++)
+  {
+    m_eDEPs.push_back(0.0);
+  }
 
   m_nhits3dSS = 0;
   m_id3dSS.clear();
@@ -525,6 +539,15 @@ void CaloTree::accumulateEnergy(double edep, int type = 0)
     m_eScintruth += edep;
   if (type == 3)
     m_eCentruth += edep;
+}
+
+void CaloTree::accumulateDeposits(double edep, int step)
+{
+  if (step < 0)
+    step = 0;
+  if (step >= 200)
+    step = 199;
+  m_eDEPs[step] += edep;
 }
 
 // ########################################################################

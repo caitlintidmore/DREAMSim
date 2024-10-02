@@ -39,6 +39,7 @@ public:
   //  called fro SteppingAction...
   void accumulateHits(CaloHit aHit);
   void accumulateEnergy(double eleak, int type);
+  void accumulateDeposits(double edep, int step);
   void saveBeamXYZE(string, int, float, float, float, float);
 
   // for histogrming...
@@ -156,6 +157,8 @@ private:
   double m_eRodtruth;
   double m_eCentruth;
   double m_eScintruth;
+
+  std::vector<double> m_eDEPs;
 
   // scintillation hit variables
   int m_nhits3dSS;

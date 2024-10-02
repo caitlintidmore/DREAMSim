@@ -47,6 +47,7 @@
 #include "G4UIExecutive.hh"
 
 #include "CaloTree.h"
+#include "B4bPhysicsList.hh"
 
 #
 using namespace std;
@@ -128,11 +129,14 @@ int main(int argc, char **argv)
 
   //   optical physics from examples/extended/optical/OpNovice2
   //  auto physicsList = new FTFP_BERT;
-  auto physicsList = new QGSP_BERT;
+  // auto physicsList = new QGSP_BERT;
+  auto physicsList = new CustomPhysicsList();
 
   physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
   G4OpticalPhysics *opticalPhysics = new G4OpticalPhysics();
   physicsList->RegisterPhysics(opticalPhysics);
+  physicsList->RemovePhysics("photonNuclear");
+  physicsList->RemovePhysics("positronNuclear");
 
   // G4Cerenkov* theCerenkovProcess=new G4Cerenkov("Cerenkov");
   // theCerenkovProcess->SetTrackSecondariesFirst(true);
@@ -186,7 +190,6 @@ int main(int argc, char **argv)
 
     // string evtmax="100";
     command = "/run/beamOn " + histo->getParamS("numberOfEvents");
-    ;
     cout << "command: " << command << endl;
     UImanager->ApplyCommand(command);
   }
