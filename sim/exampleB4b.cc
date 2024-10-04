@@ -37,6 +37,9 @@
 // #include "G4Cerenkov.hh"
 #include "Randomize.hh"
 
+#include "G4HadronicProcess.hh"
+#include "G4GammaGeneralProcess.hh"
+
 #include "B4DetectorConstruction.hh"
 #include "B4PrimaryGeneratorAction.hh"
 #include "B4bRunAction.hh"
@@ -129,22 +132,21 @@ int main(int argc, char **argv)
 
   //   optical physics from examples/extended/optical/OpNovice2
   //  auto physicsList = new FTFP_BERT;
-  // auto physicsList = new QGSP_BERT;
-  auto physicsList = new CustomPhysicsList();
+  auto physicsList = new QGSP_BERT;
+  // auto physicsList = new PhysListEmStandard();
+  //  auto physicsList = new CustomPhysicsList();
 
-  physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+  // physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
   G4OpticalPhysics *opticalPhysics = new G4OpticalPhysics();
   physicsList->RegisterPhysics(opticalPhysics);
-  physicsList->RemovePhysics("photonNuclear");
-  physicsList->RemovePhysics("positronNuclear");
+
+  runManager->SetUserInitialization(physicsList);
 
   // G4Cerenkov* theCerenkovProcess=new G4Cerenkov("Cerenkov");
   // theCerenkovProcess->SetTrackSecondariesFirst(true);
   // nt MaxNumberPhotons=300;
   // theCerenkovProcess->SetMaxNumPhotonsPerStep(MaxNumberPhotons);
   // physicsList->RegisterPhysics(theCerenkovProcess);
-
-  runManager->SetUserInitialization(physicsList);
 
   auto gen_action = new B4PrimaryGeneratorAction(detector, histo);
   runManager->SetUserAction(gen_action);
@@ -165,6 +167,33 @@ int main(int argc, char **argv)
   // Initialize visualization
   auto visManager = new G4VisExecutive;
   visManager->Initialize();
+
+  // Get the photon (gamma) particle definition
+  G4ParticleDefinition *gamma = G4Gamma::GammaDefinition();
+  G4ProcessManager *pmanager = gamma->GetProcessManager();
+  std::cout << "pmanager=" << pmanager << std::endl;
+  if (pmanager)
+  {
+    G4int nprocesses = pmanager->GetProcessListLength();
+    std::cout << "nprocesses=" << nprocesses << std::endl;
+    for (G4int i = 0; i < nprocesses; i++)
+    {
+      G4VProcess *process = (*pmanager->GetProcessList())[i];
+      std::cout << "process name: " << process->GetProcessName() << std::endl;
+
+      if (process->GetProcessName() == "GammaGeneralProc")
+      {
+        if (dynamic_cast<G4GammaGeneralProcess *>(process))
+        {
+          // https://github.com/Geant4/geant4/blob/v11.2.2/source/physics_lists/constructors/electromagnetic/include/G4GammaGeneralProcess.hh#L78
+          // and https://github.com/Geant4/geant4/blob/v11.2.2/source/physics_lists/constructors/electromagnetic/src/G4GammaGeneralProcess.cc#L619
+          ((G4GammaGeneralProcess *)process)->AddHadProcess(nullptr);
+          std::cout << "Set hadronic process of gamma to null" << std::endl;
+        }
+      }
+    }
+  }
+  std::cout << "done" << std::endl;
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
