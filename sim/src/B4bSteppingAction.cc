@@ -104,6 +104,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   // edep does not include energy transfrerred to 2ndaries.
   // https://geant4-forum.web.cern.ch/t/total-energy-and-total-energy-deposit/6936/8
   auto edep = step->GetTotalEnergyDeposit();
+  auto edepNonIon = step->GetNonIonizingEnergyDeposit();
   double charge = track->GetDefinition()->GetPDGCharge();
 
   G4TrackStatus tkstatus = track->GetTrackStatus();
@@ -113,6 +114,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   G4ParticleDefinition *particle = dynamicParticle->GetDefinition();
   G4String particleName = particle->GetParticleName();
   G4double kinEnergy = dynamicParticle->GetKineticEnergy();
+  G4double mass = particle->GetPDGMass();
 
   // Analysis of physics process...
   // if(abs(pdgcode)==2112) {
@@ -166,6 +168,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     hh->accumulateEnergy(eLeak / GeV, -99);
   }
 
+  // check energy conservation
   double e_lost = 0.0;
   bool addPositronMass = false;
   const std::vector<const G4Track *> *secondaries = step->GetSecondaryInCurrentStep();
@@ -178,6 +181,14 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       addPositronMass = true;
     }
   }
+  // deal with the decay process,
+  // where the energy of the post-step should be included
+  // not sure why the post-step energy is not zero...
+  if (step->GetPostStepPoint()->GetProcessDefinedStep() &&
+      step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName().compare("Decay") == 0)
+  {
+    e_lost -= step->GetPostStepPoint()->GetTotalEnergy();
+  }
   double e_change = step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy() - e_lost - edep;
   hh->accumulateDeposits(edep / GeV, step->GetTrack()->GetCurrentStepNumber());
   if (fabs(e_change) >= 3 * electron_mass_c2)
@@ -185,17 +196,27 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     std::cout << "Step number: " << step->GetTrack()->GetCurrentStepNumber()
               << ", Particle name: " << particleName
               << ", Number of secondaries: " << secondaries->size()
-              << ", Energy change: MeV " << e_change / MeV
-              << ", Energy lost to secondaries: " << e_lost
+              << ", Energy total lost: MeV " << e_change / MeV
+              << ", Energy to secondaries: " << e_lost
               << ", Energy deposited: " << edep
-              << ", Delta energy: " << step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy()
+              << ", Energy deposited non-ionizing: " << edepNonIon
+              << ", Delta kinetic energy: " << step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy()
               << ", Pre-step position: (" << step->GetPreStepPoint()->GetPosition().x() << ", " << step->GetPreStepPoint()->GetPosition().y() << ", " << step->GetPreStepPoint()->GetPosition().z() << ")"
               << ", Post-step position: (" << step->GetPostStepPoint()->GetPosition().x() << ", " << step->GetPostStepPoint()->GetPosition().y() << ", " << step->GetPostStepPoint()->GetPosition().z() << ")"
               << ", Pre-step time: " << step->GetPreStepPoint()->GetGlobalTime()
               << ", Post-step time: " << step->GetPostStepPoint()->GetGlobalTime()
-              << ", Pre-step momentum: (" << step->GetPreStepPoint()->GetMomentum().x() << ", " << step->GetPreStepPoint()->GetMomentum().y() << ", " << step->GetPreStepPoint()->GetMomentum().z() << ")"
-              << ", Post-step momentum: (" << step->GetPostStepPoint()->GetMomentum().x() << ", " << step->GetPostStepPoint()->GetMomentum().y() << ", " << step->GetPostStepPoint()->GetMomentum().z() << ")"
+              << ", Pre-step momentum: (" << step->GetPreStepPoint()->GetMomentum().x() << ", " << step->GetPreStepPoint()->GetMomentum().y() << ", " << step->GetPreStepPoint()->GetMomentum().z() << ") with kinetic energy: " << step->GetPreStepPoint()->GetKineticEnergy() << " and total energy: " << step->GetPreStepPoint()->GetTotalEnergy()
+              << ", Post-step momentum: (" << step->GetPostStepPoint()->GetMomentum().x() << ", " << step->GetPostStepPoint()->GetMomentum().y() << ", " << step->GetPostStepPoint()->GetMomentum().z() << ") with kinetic energy: " << step->GetPostStepPoint()->GetKineticEnergy() << " and total energy: " << step->GetPostStepPoint()->GetTotalEnergy()
               << std::endl;
+    if (step->GetPreStepPoint()->GetProcessDefinedStep())
+    {
+      std::cout << "Process name: (prestep) " << step->GetPreStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+    if (step->GetPostStepPoint()->GetProcessDefinedStep())
+    {
+      std::cout << "Process name: (poststep) " << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+    std::cout << "Track status " << tkstatus << std::endl;
   }
 
   if (thisName.compare(0, 5, "World") == 0)

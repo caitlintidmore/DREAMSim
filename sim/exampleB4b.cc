@@ -168,32 +168,35 @@ int main(int argc, char **argv)
   auto visManager = new G4VisExecutive;
   visManager->Initialize();
 
-  // Get the photon (gamma) particle definition
-  G4ParticleDefinition *gamma = G4Gamma::GammaDefinition();
-  G4ProcessManager *pmanager = gamma->GetProcessManager();
-  std::cout << "pmanager=" << pmanager << std::endl;
-  if (pmanager)
+  if (0)
   {
-    G4int nprocesses = pmanager->GetProcessListLength();
-    std::cout << "nprocesses=" << nprocesses << std::endl;
-    for (G4int i = 0; i < nprocesses; i++)
+    // Get the photon (gamma) particle definition
+    G4ParticleDefinition *gamma = G4Gamma::GammaDefinition();
+    G4ProcessManager *pmanager = gamma->GetProcessManager();
+    std::cout << "pmanager=" << pmanager << std::endl;
+    if (pmanager)
     {
-      G4VProcess *process = (*pmanager->GetProcessList())[i];
-      std::cout << "process name: " << process->GetProcessName() << std::endl;
-
-      if (process->GetProcessName() == "GammaGeneralProc")
+      G4int nprocesses = pmanager->GetProcessListLength();
+      std::cout << "nprocesses=" << nprocesses << std::endl;
+      for (G4int i = 0; i < nprocesses; i++)
       {
-        if (dynamic_cast<G4GammaGeneralProcess *>(process))
+        G4VProcess *process = (*pmanager->GetProcessList())[i];
+        std::cout << "process name: " << process->GetProcessName() << std::endl;
+
+        if (process->GetProcessName() == "GammaGeneralProc")
         {
-          // https://github.com/Geant4/geant4/blob/v11.2.2/source/physics_lists/constructors/electromagnetic/include/G4GammaGeneralProcess.hh#L78
-          // and https://github.com/Geant4/geant4/blob/v11.2.2/source/physics_lists/constructors/electromagnetic/src/G4GammaGeneralProcess.cc#L619
-          ((G4GammaGeneralProcess *)process)->AddHadProcess(nullptr);
-          std::cout << "Set hadronic process of gamma to null" << std::endl;
+          if (dynamic_cast<G4GammaGeneralProcess *>(process))
+          {
+            // https://github.com/Geant4/geant4/blob/v11.2.2/source/physics_lists/constructors/electromagnetic/include/G4GammaGeneralProcess.hh#L78
+            // and https://github.com/Geant4/geant4/blob/v11.2.2/source/physics_lists/constructors/electromagnetic/src/G4GammaGeneralProcess.cc#L619
+            ((G4GammaGeneralProcess *)process)->AddHadProcess(nullptr);
+            std::cout << "Set hadronic process of gamma to null" << std::endl;
+          }
         }
       }
     }
+    std::cout << "done" << std::endl;
   }
-  std::cout << "done" << std::endl;
 
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();

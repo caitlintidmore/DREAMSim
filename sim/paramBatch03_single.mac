@@ -43,6 +43,9 @@
 # G4 commands.
 # Initialize kernel
 /run/initialize
+
+/process/list
+#/process/inactivate positronNuclear
 #
 # /tracking/verbose 1
 /tracking/verbose 1
