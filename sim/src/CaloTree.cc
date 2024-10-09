@@ -347,11 +347,11 @@ void CaloTree::EndEvent()
     tree->Fill();
     std::cout << "Look into energy deposition in the calorimeter..." << std::endl;
     std::cout << " total absolute energy deposits " << std::accumulate(m_eDEPs.begin(), m_eDEPs.end(), 0.0) << std::endl;
-    for (int i = 0; i < 200; i++)
-    {
-      if (m_eDEPs[i] > 0.0)
-        std::cout << "  i=" << i << "  eDEP=" << m_eDEPs[i] << std::endl;
-    }
+    // for (int i = 0; i < 200; i++)
+    //{
+    //   if (m_eDEPs[i] > 0.0)
+    //     std::cout << "  i=" << i << "  eDEP=" << m_eDEPs[i] << std::endl;
+    // }
     std::cout << "  eCalo=" << m_eCalotruth << "  eWorld=" << m_eWorldtruth << "  eLeak=" << m_eLeaktruth << "  eInvisible=" << m_eInvisible << " eInvisible_s100 " << m_eInvisible_s100 << " eInvisible_s1000 " << m_eInvisible_s1000 << "  eRod=" << m_eRodtruth << "  eCen=" << m_eCentruth << "  eScin=" << m_eScintruth << " eCalo+eWorld+eLeak+eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + m_eInvisible) << " eCalo+eWorld+eLeak+0.5*eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + 0.5 * m_eInvisible) << std::endl;
   } //  end of if((eventCounts-1)<getParamI("eventsInNtupe"))
 

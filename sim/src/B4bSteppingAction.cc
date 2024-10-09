@@ -37,6 +37,8 @@
 #include "G4RunManager.hh"
 #include "G4UnitsTable.hh"
 #include "G4Triton.hh"
+#include "G4Proton.hh"
+#include "G4Neutron.hh"
 
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
@@ -164,57 +166,75 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     double eLeak = step->GetPostStepPoint()->GetKineticEnergy();
     if (particle == G4Positron::Positron())
     {
+      // electron pair production
+      // mass is created from the vacuum using the kinetic energy
+      // therefore should include it
       eLeak += 2 * electron_mass_c2;
     }
     hh->accumulateEnergy(eLeak / GeV, -99);
   }
 
   // check energy conservation
-  double e_lost = 0.0;
+  double e_kinetic_lost = step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy();
+  double e_secondary = 0.0;
   double m_produced = 0.0;
   bool addPositronMass = false;
+  int nNucleon = 0;
   const std::vector<const G4Track *> *secondaries = step->GetSecondaryInCurrentStep();
   for (auto sec : *secondaries)
   {
-    e_lost += sec->GetKineticEnergy();
+    e_secondary += sec->GetKineticEnergy();
     m_produced += sec->GetDynamicParticle()->GetMass();
+    if (sec->GetParticleDefinition() == G4Proton::Proton() || sec->GetParticleDefinition() == G4Neutron::Neutron())
+    {
+      nNucleon++;
+    }
     // if (particle != G4Positron::Positron() && sec->GetParticleDefinition() == G4Positron::Positron())
     //{
-    //   e_lost += 2 * electron_mass_c2;
+    //   e_secondary += 2 * electron_mass_c2;
     //   addPositronMass = true;
     // }
   }
   // deal with the decay process,
   // where the energy of the post-step should be included
-  // not sure why the post-step energy is not zero...
+  // triton seems to be a special case, with zero secondary particles after the decay step
   if (step->GetPostStepPoint()->GetProcessDefinedStep() &&
       step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName().compare("Decay") == 0 &&
       particle != G4Triton::Triton())
   {
-    e_lost -= step->GetPostStepPoint()->GetTotalEnergy();
-    // decay product should include the mass
-    e_lost += m_produced;
+    // in Geant4 at the decay step, it seems the total energy (i.e., mass, with kinetic energy beign zero)
+    // is not reset to 0
+    e_secondary -= step->GetPostStepPoint()->GetTotalEnergy();
+    // mass of the decay product is created from the vacuum using the kinetic energy
+    e_secondary += m_produced;
   }
-  double e_change = step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy() - e_lost - edep;
-  hh->accumulateDeposits(edep / GeV, step->GetTrack()->GetCurrentStepNumber());
-  hh->accumulateEnergy(e_change / GeV, -90);
-  if (fabs(e_change / MeV) < 1000.0)
-    hh->accumulateEnergy(e_change / GeV, -91);
-  if (fabs(e_change / MeV) < 100.0)
-    hh->accumulateEnergy(e_change / GeV, -92);
-  // if (fabs(e_change) >= 3 * electron_mass_c2)
-  if (fabs(e_change) >= 100.0 * MeV)
+  double e_net_change = e_kinetic_lost - e_secondary - edep;
+  while (e_net_change > 0.938272 * GeV && nNucleon > 0)
   {
+    e_net_change -= 0.938272 * GeV;
+    nNucleon--;
+  }
+  hh->accumulateDeposits(edep / GeV, step->GetTrack()->GetCurrentStepNumber());
+  hh->accumulateEnergy(e_net_change / GeV, -90);
+  if (fabs(e_net_change / MeV) < 1000.0)
+    hh->accumulateEnergy(e_net_change / GeV, -91);
+  if (fabs(e_net_change / MeV) < 100.0)
+    hh->accumulateEnergy(e_net_change / GeV, -92);
+  // if (fabs(e_net_change) >= 3 * electron_mass_c2)
+  if (fabs(e_net_change) >= 100.0 * MeV)
+  {
+    std::cout << "Found energy conservation problem: " << e_net_change / MeV << " MeV. Dump information.." << std::endl;
     std::cout << "Step number: " << step->GetTrack()->GetCurrentStepNumber()
               << ", Particle name: " << particleName
               << ", Number of secondaries: " << secondaries->size()
-              << ", Energy total lost: MeV " << e_change / MeV
-              << ", Energy to secondaries: " << e_lost
-              << ", Energy deposited: " << edep
-              << ", Energy deposited non-ionizing: " << edepNonIon
-              << ", Delta Kinetic energy: " << step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy()
+              << ", Energy total lost: MeV " << e_net_change / MeV
+              << ", Energy to secondaries: " << e_secondary / MeV
+              << ", Energy deposited: " << edep / MeV
+              << ", Energy deposited non-ionizing: " << edepNonIon / MeV
+              << ", Delta Kinetic energy: " << e_kinetic_lost / MeV
               << ", Delta Total energy: " << step->GetPreStepPoint()->GetTotalEnergy() - step->GetPostStepPoint()->GetTotalEnergy()
-              << ", Pre-step position: (" << step->GetPreStepPoint()->GetPosition().x() << ", " << step->GetPreStepPoint()->GetPosition().y() << ", " << step->GetPreStepPoint()->GetPosition().z() << ")"
+              << std::endl;
+    std::cout << ", Pre-step position: (" << step->GetPreStepPoint()->GetPosition().x() << ", " << step->GetPreStepPoint()->GetPosition().y() << ", " << step->GetPreStepPoint()->GetPosition().z() << ")"
               << ", Post-step position: (" << step->GetPostStepPoint()->GetPosition().x() << ", " << step->GetPostStepPoint()->GetPosition().y() << ", " << step->GetPostStepPoint()->GetPosition().z() << ")"
               << ", Pre-step time: " << step->GetPreStepPoint()->GetGlobalTime()
               << ", Post-step time: " << step->GetPostStepPoint()->GetGlobalTime()
@@ -229,16 +249,24 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     {
       std::cout << "Process name: (poststep) " << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
     }
+    double e_kin_sum = 0;
+    double e_tot_sum = 0;
     for (auto sec : *secondaries)
     {
+      e_kin_sum += sec->GetKineticEnergy();
+      e_tot_sum += sec->GetTotalEnergy();
       std::cout << "Secondary name: " << sec->GetParticleDefinition()->GetParticleName()
-                << ", Energy: " << sec->GetKineticEnergy() / MeV
+                << ", Kinetic energy: " << sec->GetKineticEnergy() / MeV
                 << ", Position: (" << sec->GetPosition().x() << ", " << sec->GetPosition().y() << ", " << sec->GetPosition().z() << ")"
                 << ", Momentum: (" << sec->GetMomentum().x() << ", " << sec->GetMomentum().y() << ", " << sec->GetMomentum().z() << ")"
                 << ", Process name: " << sec->GetCreatorProcess()->GetProcessName()
                 << std::endl;
     }
+    std::cout << "Sum of kinetic energy of secondaries: " << e_kin_sum / MeV << " MeV"
+              << ", Sum of total energy of secondaries: " << e_tot_sum / MeV << " MeV"
+              << std::endl;
     std::cout << "Track status " << tkstatus << std::endl;
+    std::cout << std::endl;
   }
 
   if (thisName.compare(0, 5, "World") == 0)

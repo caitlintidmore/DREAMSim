@@ -45,6 +45,7 @@
 /run/initialize
 
 /process/list
+/physics_list/list
 #/process/inactivate positronNuclear
 #
 # /tracking/verbose 1

@@ -32,6 +32,7 @@
 #include "G4UImanager.hh"
 // #include "FTFP_BERT.hh"
 #include "QGSP_BERT.hh"
+#include "QBBC.hh"
 #include "G4EmStandardPhysics_option4.hh"
 #include "G4OpticalPhysics.hh"
 // #include "G4Cerenkov.hh"
@@ -133,8 +134,9 @@ int main(int argc, char **argv)
   //   optical physics from examples/extended/optical/OpNovice2
   //  auto physicsList = new FTFP_BERT;
   auto physicsList = new QGSP_BERT;
-  // auto physicsList = new PhysListEmStandard();
-  //  auto physicsList = new CustomPhysicsList();
+  // auto physicsList = new QBBC;
+  //  auto physicsList = new PhysListEmStandard();
+  //   auto physicsList = new CustomPhysicsList();
 
   // physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
   G4OpticalPhysics *opticalPhysics = new G4OpticalPhysics();
