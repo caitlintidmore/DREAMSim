@@ -202,6 +202,7 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("eCalotruth", &m_eCalotruth);
   tree->Branch("eWorldtruth", &m_eWorldtruth);
   tree->Branch("eLeaktruth", &m_eLeaktruth);
+  tree->Branch("eInvisible", &m_eInvisible);
   tree->Branch("eRodtruth", &m_eRodtruth);
   tree->Branch("eCentruth", &m_eCentruth);
   tree->Branch("eScintruth", &m_eScintruth);
@@ -351,6 +352,7 @@ void CaloTree::EndEvent()
       if (m_eDEPs[i] > 0.0)
         std::cout << "  i=" << i << "  eDEP=" << m_eDEPs[i] << std::endl;
     }
+    std::cout << "  eCalo=" << m_eCalotruth << "  eWorld=" << m_eWorldtruth << "  eLeak=" << m_eLeaktruth << "  eInvisible=" << m_eInvisible << " eInvisible_s100 " << m_eInvisible_s100 << " eInvisible_s1000 " << m_eInvisible_s1000 << "  eRod=" << m_eRodtruth << "  eCen=" << m_eCentruth << "  eScin=" << m_eScintruth << " eCalo+eWorld+eLeak+eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + m_eInvisible) << " eCalo+eWorld+eLeak+0.5*eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + 0.5 * m_eInvisible) << std::endl;
   } //  end of if((eventCounts-1)<getParamI("eventsInNtupe"))
 
   //   analyze this event.
@@ -417,6 +419,9 @@ void CaloTree::clearCaloTree()
   m_eCalotruth = 0.0;
   m_eWorldtruth = 0.0;
   m_eLeaktruth = 0.0;
+  m_eInvisible = 0.0;
+  m_eInvisible_s100 = 0.0;
+  m_eInvisible_s1000 = 0.0;
   m_eRodtruth = 0.0;
   m_eCentruth = 0.0;
   m_eScintruth = 0.0;
@@ -529,6 +534,12 @@ void CaloTree::accumulateEnergy(double edep, int type = 0)
 {
   if (type == -99)
     m_eLeaktruth += edep;
+  if (type == -92)
+    m_eInvisible_s100 += edep;
+  if (type == -91)
+    m_eInvisible_s1000 += edep;
+  if (type == -90)
+    m_eInvisible += edep;
   if (type == -1)
     m_eWorldtruth += edep;
   if (type >= 0)

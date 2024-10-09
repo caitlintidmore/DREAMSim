@@ -36,6 +36,7 @@
 #include "G4Step.hh"
 #include "G4RunManager.hh"
 #include "G4UnitsTable.hh"
+#include "G4Triton.hh"
 
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
@@ -170,28 +171,39 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 
   // check energy conservation
   double e_lost = 0.0;
+  double m_produced = 0.0;
   bool addPositronMass = false;
   const std::vector<const G4Track *> *secondaries = step->GetSecondaryInCurrentStep();
   for (auto sec : *secondaries)
   {
     e_lost += sec->GetKineticEnergy();
-    if (particle != G4Positron::Positron() && sec->GetParticleDefinition() == G4Positron::Positron())
-    {
-      e_lost += 2 * electron_mass_c2;
-      addPositronMass = true;
-    }
+    m_produced += sec->GetDynamicParticle()->GetMass();
+    // if (particle != G4Positron::Positron() && sec->GetParticleDefinition() == G4Positron::Positron())
+    //{
+    //   e_lost += 2 * electron_mass_c2;
+    //   addPositronMass = true;
+    // }
   }
   // deal with the decay process,
   // where the energy of the post-step should be included
   // not sure why the post-step energy is not zero...
   if (step->GetPostStepPoint()->GetProcessDefinedStep() &&
-      step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName().compare("Decay") == 0)
+      step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName().compare("Decay") == 0 &&
+      particle != G4Triton::Triton())
   {
     e_lost -= step->GetPostStepPoint()->GetTotalEnergy();
+    // decay product should include the mass
+    e_lost += m_produced;
   }
   double e_change = step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy() - e_lost - edep;
   hh->accumulateDeposits(edep / GeV, step->GetTrack()->GetCurrentStepNumber());
-  if (fabs(e_change) >= 3 * electron_mass_c2)
+  hh->accumulateEnergy(e_change / GeV, -90);
+  if (fabs(e_change / MeV) < 1000.0)
+    hh->accumulateEnergy(e_change / GeV, -91);
+  if (fabs(e_change / MeV) < 100.0)
+    hh->accumulateEnergy(e_change / GeV, -92);
+  // if (fabs(e_change) >= 3 * electron_mass_c2)
+  if (fabs(e_change) >= 100.0 * MeV)
   {
     std::cout << "Step number: " << step->GetTrack()->GetCurrentStepNumber()
               << ", Particle name: " << particleName
@@ -200,7 +212,8 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
               << ", Energy to secondaries: " << e_lost
               << ", Energy deposited: " << edep
               << ", Energy deposited non-ionizing: " << edepNonIon
-              << ", Delta kinetic energy: " << step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy()
+              << ", Delta Kinetic energy: " << step->GetPreStepPoint()->GetKineticEnergy() - step->GetPostStepPoint()->GetKineticEnergy()
+              << ", Delta Total energy: " << step->GetPreStepPoint()->GetTotalEnergy() - step->GetPostStepPoint()->GetTotalEnergy()
               << ", Pre-step position: (" << step->GetPreStepPoint()->GetPosition().x() << ", " << step->GetPreStepPoint()->GetPosition().y() << ", " << step->GetPreStepPoint()->GetPosition().z() << ")"
               << ", Post-step position: (" << step->GetPostStepPoint()->GetPosition().x() << ", " << step->GetPostStepPoint()->GetPosition().y() << ", " << step->GetPostStepPoint()->GetPosition().z() << ")"
               << ", Pre-step time: " << step->GetPreStepPoint()->GetGlobalTime()
@@ -215,6 +228,15 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     if (step->GetPostStepPoint()->GetProcessDefinedStep())
     {
       std::cout << "Process name: (poststep) " << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+    for (auto sec : *secondaries)
+    {
+      std::cout << "Secondary name: " << sec->GetParticleDefinition()->GetParticleName()
+                << ", Energy: " << sec->GetKineticEnergy() / MeV
+                << ", Position: (" << sec->GetPosition().x() << ", " << sec->GetPosition().y() << ", " << sec->GetPosition().z() << ")"
+                << ", Momentum: (" << sec->GetMomentum().x() << ", " << sec->GetMomentum().y() << ", " << sec->GetMomentum().z() << ")"
+                << ", Process name: " << sec->GetCreatorProcess()->GetProcessName()
+                << std::endl;
     }
     std::cout << "Track status " << tkstatus << std::endl;
   }

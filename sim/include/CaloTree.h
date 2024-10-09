@@ -154,6 +154,9 @@ private:
   double m_eCalotruth;
   double m_eWorldtruth;
   double m_eLeaktruth;
+  double m_eInvisible;
+  double m_eInvisible_s100;
+  double m_eInvisible_s1000;
   double m_eRodtruth;
   double m_eCentruth;
   double m_eScintruth;
