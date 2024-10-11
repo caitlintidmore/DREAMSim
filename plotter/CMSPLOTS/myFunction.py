@@ -507,7 +507,7 @@ def DrawHistos(myhistos, mylabels, xmin, xmax, xlabel, ymin, ymax, ylabel, outpu
         canvas.SetTicks(1, 1)
         padsize1 = 1.0
         if doth2:
-            canvas.SetRightMargin(0.12)
+            canvas.SetRightMargin(0.14)
         padsize2 = 0.
         padsize3 = 0.
         canvas.cd()
@@ -582,6 +582,7 @@ def DrawHistos(myhistos, mylabels, xmin, xmax, xlabel, ymin, ymax, ylabel, outpu
         h1.SetMaximum(ymax)    
     else:
         h1 = ROOT.TH2F("h2" + outputname, "h2", 80, xmin, xmax, 80, ymin, ymax)
+        h1.GetZaxis().SetLabelSize(0.03)
         if zmin!=None and zmax!=None:
             #print(f"configuring z range to {zmin}, {zmax}")
             h1.GetZaxis().SetRangeUser(zmin, zmax)

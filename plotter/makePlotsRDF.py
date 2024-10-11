@@ -41,27 +41,14 @@ for part, filename in loops:
             if nfiles > 100:
                 break
     rdfs[part] = ROOT.RDataFrame(chains[part])
-
-rdfs['ele'] = rdfs['ele'].Define(
-    "eTotaltruth", "eLeaktruth + eCalotruth + eWorldtruth + eInvisible")
-rdfs['pion'] = rdfs['pion'].Define(
-    "eTotaltruth", "eLeaktruth + eCalotruth + eWorldtruth + eInvisible")
-rdfs['neu'] = rdfs['neu'].Define(
-    "eTotaltruth", "eLeaktruth + eCalotruth + eWorldtruth + eInvisible")
-
-rdfs['ele'] = rdfs['ele'].Define(
-    "eTotalGeant", "eLeaktruth + eCalotruth + eWorldtruth")
-rdfs['pion'] = rdfs['pion'].Define(
-    "eTotalGeant", "eLeaktruth + eCalotruth + eWorldtruth")
-rdfs['neu'] = rdfs['neu'].Define(
-    "eTotalGeant", "eLeaktruth + eCalotruth + eWorldtruth")
-
-rdfs['ele'] = rdfs['ele'].Define(
-    "truthhit_r", "sqrt(truthhit_x*truthhit_y + truthhit_x*truthhit_y)")
-rdfs['pion'] = rdfs['pion'].Define(
-    "truthhit_r", "sqrt(truthhit_x*truthhit_x + truthhit_y*truthhit_y)")
-rdfs['neu'] = rdfs['neu'].Define(
-    "truthhit_r", "sqrt(truthhit_x*truthhit_y + truthhit_y*truthhit_y)")
+    
+rdfs_new = OrderedDict()
+for part in rdfs.keys():
+    rdfs_new[part] = rdfs[part].Define( "eTotaltruth", "eLeaktruth + eCalotruth + eWorldtruth + eInvisible") \
+        .Define("eTotalGeant", "eLeaktruth + eCalotruth + eWorldtruth") \
+        .Define("truthhit_r", f"sqrt((truthhit_x-2.5)*(truthhit_x-2.5) + (truthhit_y+2.5)*(truthhit_y+2.5))") 
+            
+rdfs = rdfs_new
 
 nEvts = OrderedDict()
 nEvts['ele'] = rdfs['ele'].Count().GetValue()
@@ -142,16 +129,16 @@ for part, rdf in rdfs.items():
     for i in evtlist:
         rdf_event = rdf.Filter(f"rdfentry_ == {i}")
         histos[f"event_{i}_truthhit_x_vs_truthhit_y"][part] = rdf_event.Histo2D(
-            (f"event_{i}_truthhit_x_vs_truthhit_y" + suffix, f"event_{i}_truthhit_x_vs_truthhit_y", 50, -20, 20, 50, -20, 20), "truthhit_x", "truthhit_y", "eweight")
+            (f"event_{i}_truthhit_x_vs_truthhit_y" + suffix, f"event_{i}_truthhit_x_vs_truthhit_y", 50, -20, 20, 50, -20, 20), "truthhit_x", "truthhit_y", "truthhit_edep")
         histos[f"event_{i}_truthhit_x_vs_truthhit_z"][part] = rdf_event.Histo2D(
-            (f"event_{i}_truthhit_x_vs_truthhit_z" + suffix, f"event_{i}_truthhit_x_vs_truthhit_z", 50, -20, 20, 100, -100, 100), "truthhit_x", "truthhit_z", "eweight")
+            (f"event_{i}_truthhit_x_vs_truthhit_z" + suffix, f"event_{i}_truthhit_x_vs_truthhit_z", 50, -20, 20, 100, -100, 100), "truthhit_x", "truthhit_z", "truthhit_edep")
         histos[f"event_{i}_truthhit_r_vs_truthhit_z"][part] = rdf_event.Histo2D(
-            (f"event_{i}_truthhit_r_vs_truthhit_z" + suffix, f"event_{i}_truthhit_r_vs_truthhit_z", 50, 0, 30, 100, -100, 100), "truthhit_r", "truthhit_z", "eweight")
+            (f"event_{i}_truthhit_r_vs_truthhit_z" + suffix, f"event_{i}_truthhit_r_vs_truthhit_z", 50, 0, 30, 100, -100, 100), "truthhit_r", "truthhit_z", "truthhit_edep")
 
         histos[f"event_{i}_time_vs_truthhit_z"][part] = rdf_event.Histo2D(
-            (f"event_{i}_time_vs_truthhit_z" + suffix, f"event_{i}_time_vs_truthhit_z", 50, 0, 20, 100, -100, 100), "truthhit_globaltime", "truthhit_z", "eweight")
+            (f"event_{i}_time_vs_truthhit_z" + suffix, f"event_{i}_time_vs_truthhit_z", 50, 0, 20, 100, -100, 100), "truthhit_globaltime", "truthhit_z", "truthhit_edep")
         histos[f"event_{i}_time_vs_truthhit_r"][part] = rdf_event.Histo2D(
-            (f"event_{i}_time_vs_truthhit_r" + suffix, f"event_{i}_time_vs_truthhit_r", 50, 0, 20, 50, 0, 30), "truthhit_globaltime", "truthhit_r", "eweight")
+            (f"event_{i}_time_vs_truthhit_r" + suffix, f"event_{i}_time_vs_truthhit_r", 50, 0, 20, 50, 0, 30), "truthhit_globaltime", "truthhit_r", "truthhit_edep")
 
 colormaps = {
     'ele': 2,
@@ -214,8 +201,11 @@ DrawHistos(list(histos['time_zoomed'].values()), list(histos['time_zoomed'].keys
 args['dology'] = False
 args['drawoptions'] = "colz"
 args['dologz'] = True
-args['zmax'] = 1e2
-args['zmin'] = 1e-3
+args['zmax'] = 1e0
+args['zmin'] = 1e-6
+args['doth2'] = True
+args['addOverflow'] = False
+args['addUnderflow'] = False
 for part in rdfs.keys():
     DrawHistos([histos['truthhit_x_vs_truthhit_y'][part]], [], -20, 20,
                "x [cm]", -20, 20, "y [cm]", f"truthhit_x_vs_truthhit_y_{part}", **args)
