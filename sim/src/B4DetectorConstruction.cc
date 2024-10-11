@@ -164,20 +164,20 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     //   chts[100]
     //
     // Geometry parameters
-    double fiberLength = 200.0 * cm;
-    double holeDiameter = 0.25 * cm;
-    double rodSize = 0.4 * cm;
-    double noLayers = 80.0;
+    double fiberLength = 20.0 * cm;
+    double holeDiameter = 2.5 * cm;
+    double rodSize = 4.0 * cm;
+    double noLayers = 1;
     double layerThickness = rodSize;
-    double noRods = 90.0;
+    double noRods = 1;
 
     double calorSizeX = rodSize * noRods;
     double calorSizeY = rodSize * noLayers;
     double calorSizeZ = fiberLength;
 
-    double worldSizeX = 1.4 * calorSizeX;
-    double worldSizeY = 1.4 * calorSizeY;
-    double worldSizeZ = 1.2 * calorSizeZ;
+    double worldSizeX = 1.01 * calorSizeX;
+    double worldSizeY = 1.01 * calorSizeY;
+    double worldSizeZ = 1.01 * calorSizeZ;
 
     double density;
     int ncomponentsbrass;
@@ -394,26 +394,26 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     G4Material *core_S_Material = polystyrene;
 
     // Parameters for fibers
-    double clad_C_rMin = 0.39 * mm;       // cladding cherenkov minimum radius
-    double clad_C_rMax = 0.40 * mm;       // cladding cherenkov max radius
+    double clad_C_rMin = 0.39 * cm;       // cladding cherenkov minimum radius
+    double clad_C_rMax = 0.40 * cm;       // cladding cherenkov max radius
     double clad_C_Dz = fiberLength / 2.0; // cladding cherenkov lenght
     // double clad_C_Sphi = 0.;              // cladding cherenkov min rotation
     //  double clad_C_Dphi = 2. * M_PI;       // cladding chrenkov max rotation
 
-    double core_C_rMin = 0. * mm;
-    double core_C_rMax = 0.39 * mm;
+    double core_C_rMin = 0. * cm;
+    double core_C_rMax = 0.39 * cm;
     double core_C_Dz = clad_C_Dz;
     // double core_C_Sphi = 0.;
     //  double core_C_Dphi = 2. * M_PI;
 
-    double clad_S_rMin = 0.39 * mm;
-    double clad_S_rMax = 0.40 * mm;
+    double clad_S_rMin = 0.39 * cm;
+    double clad_S_rMax = 0.40 * cm;
     double clad_S_Dz = clad_C_Dz;
     // double clad_S_Sphi = 0.;
     // double clad_S_Dphi = 2. * M_PI;
 
-    double core_S_rMin = 0. * mm;
-    double core_S_rMax = 0.39 * mm;
+    double core_S_rMin = 0. * cm;
+    double core_S_rMax = 0.39 * cm;
     double core_S_Dz = clad_C_Dz;
     // double core_S_Sphi = 0.;
     //  double core_S_Dphi = 2. * M_PI;
@@ -468,14 +468,14 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     //
     // worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
-    worldLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0)));  // blue
-    calorLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0)));  // red
-    layerLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 1.0, 0.0))); // green
-    rodLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 0.0, 0.0)));   // blue
+    worldLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0, 0.5)));  // blue
+    calorLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0, 0.1)));  // red
+    layerLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 1.0, 0.0, 0.6))); // green
+    rodLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 0.0, 0.0, 0.6)));   // blue
     // holeLV->SetVisAttributes(new G4VisAttributes(FALSE,G4Colour(1.0,1.0,1.0))); // black
-    holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 1.0, 0.0)));    // black
-    fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0))); // blue
-    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0))); // red
+    holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 1.0, 1.0, 0.5))); // white
+    fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.8, 0.5, 0.8, 0.9)));
+    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.5, 0.8, 0.9))); // red
 
     std::cout << "B4DetectorConstruction::DefineVolumes()...  endss..." << std::endl;
     //

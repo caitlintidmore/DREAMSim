@@ -93,12 +93,12 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   const G4ParticleDefinition *particleDef =
       dynamicParticle->GetParticleDefinition();
 
-  if (particleDef == opticalphoton)
-  {
-    track->SetTrackStatus(fStopAndKill);
-    return;
-  }
-  //   === end of checking optical photon ===
+  // if (particleDef == opticalphoton)
+  //{
+  //   track->SetTrackStatus(fStopAndKill);
+  //   return;
+  // }
+  //    === end of checking optical photon ===
 
   // get volume of the current step
   // auto volume = step->GetPreStepPoint()->GetTouchableHandle()->GetVolume();
