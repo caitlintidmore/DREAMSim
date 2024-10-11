@@ -184,20 +184,22 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("beamID", &m_beamID);
   tree->Branch("beamType", &m_beamType);
 
-  tree->Branch("nhitstruth", &m_nhitstruth);
-  tree->Branch("pidtruth", &m_pidtruth);
-  tree->Branch("trackidtruth", &m_trackidtruth);
-  tree->Branch("calotypetruth", &m_calotypetruth);
-  tree->Branch("xtruth", &m_xtruth);
-  tree->Branch("ytruth", &m_ytruth);
-  tree->Branch("ztruth", &m_ztruth);
-  tree->Branch("steplength", &m_steplengthtruth);
-  tree->Branch("globaltimetruth", &m_globaltimetruth);
-  tree->Branch("localtimetruth", &m_localtimetruth);
-  tree->Branch("edeptruth", &m_edeptruth);
-  tree->Branch("edepbirktruth", &m_edepbirktruth);
-  tree->Branch("ncertruth", &m_ncertruth);
-  tree->Branch("ncercaptruth", &m_ncercaptruth);
+  tree->Branch("ntruthhits", &m_nhitstruth);
+  tree->Branch("truthhit_pid", &m_pidtruth);
+  tree->Branch("truthhit_trackid", &m_trackidtruth);
+  tree->Branch("truthhit_calotype", &m_calotypetruth);
+  tree->Branch("truthhit_x", &m_xtruth);
+  tree->Branch("truthhit_y", &m_ytruth);
+  tree->Branch("truthhit_z", &m_ztruth);
+  tree->Branch("truthhit_steplength", &m_steplengthtruth);
+  tree->Branch("truthhit_globaltime", &m_globaltimetruth);
+  tree->Branch("truthhit_localtime", &m_localtimetruth);
+  tree->Branch("truthhit_edep", &m_edeptruth);
+  tree->Branch("truthhit_edepNonIon", &m_edepNonIontruth);
+  tree->Branch("truthhit_edepInv", &m_edepInvtruth);
+  tree->Branch("truthhit_edepbirk", &m_edepbirktruth);
+  tree->Branch("truthhit_ncer", &m_ncertruth);
+  tree->Branch("truthhit_ncercap", &m_ncercaptruth);
 
   tree->Branch("eCalotruth", &m_eCalotruth);
   tree->Branch("eWorldtruth", &m_eWorldtruth);
@@ -346,13 +348,7 @@ void CaloTree::EndEvent()
     //
     tree->Fill();
     std::cout << "Look into energy deposition in the calorimeter..." << std::endl;
-    std::cout << " total absolute energy deposits " << std::accumulate(m_eDEPs.begin(), m_eDEPs.end(), 0.0) << std::endl;
-    // for (int i = 0; i < 200; i++)
-    //{
-    //   if (m_eDEPs[i] > 0.0)
-    //     std::cout << "  i=" << i << "  eDEP=" << m_eDEPs[i] << std::endl;
-    // }
-    std::cout << "  eCalo=" << m_eCalotruth << "  eWorld=" << m_eWorldtruth << "  eLeak=" << m_eLeaktruth << "  eInvisible=" << m_eInvisible << " eInvisible_s100 " << m_eInvisible_s100 << " eInvisible_s1000 " << m_eInvisible_s1000 << "  eRod=" << m_eRodtruth << "  eCen=" << m_eCentruth << "  eScin=" << m_eScintruth << " eCalo+eWorld+eLeak+eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + m_eInvisible) << " eCalo+eWorld+eLeak+0.5*eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + 0.5 * m_eInvisible) << std::endl;
+    std::cout << "  eCalo=" << m_eCalotruth << "  eWorld=" << m_eWorldtruth << "  eLeak=" << m_eLeaktruth << "  eInvisible=" << m_eInvisible << "  eRod=" << m_eRodtruth << "  eCen=" << m_eCentruth << "  eScin=" << m_eScintruth << " eCalo+eWorld+eLeak+eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + m_eInvisible) << std::endl;
   } //  end of if((eventCounts-1)<getParamI("eventsInNtupe"))
 
   //   analyze this event.
@@ -412,6 +408,8 @@ void CaloTree::clearCaloTree()
   m_globaltimetruth.clear();
   m_localtimetruth.clear();
   m_edeptruth.clear();
+  m_edepNonIontruth.clear();
+  m_edepInvtruth.clear();
   m_edepbirktruth.clear();
   m_ncertruth.clear();
   m_ncercaptruth.clear();
@@ -420,17 +418,9 @@ void CaloTree::clearCaloTree()
   m_eWorldtruth = 0.0;
   m_eLeaktruth = 0.0;
   m_eInvisible = 0.0;
-  m_eInvisible_s100 = 0.0;
-  m_eInvisible_s1000 = 0.0;
   m_eRodtruth = 0.0;
   m_eCentruth = 0.0;
   m_eScintruth = 0.0;
-
-  m_eDEPs.clear();
-  for (unsigned int i = 0; i < 200; i++)
-  {
-    m_eDEPs.push_back(0.0);
-  }
 
   m_nhits3dSS = 0;
   m_id3dSS.clear();
@@ -477,6 +467,8 @@ void CaloTree::accumulateHits(CaloHit ah)
     m_globaltimetruth.push_back(ah.globaltime);
     m_localtimetruth.push_back(ah.localtime);
     m_edeptruth.push_back(ah.edep);
+    m_edepNonIontruth.push_back(ah.edepNonIon);
+    m_edepInvtruth.push_back(ah.edepInv);
     m_edepbirktruth.push_back(ah.edepbirk);
     m_ncertruth.push_back(ah.ncer);
     m_ncercaptruth.push_back(ah.ncercap);
@@ -534,10 +526,6 @@ void CaloTree::accumulateEnergy(double edep, int type = 0)
 {
   if (type == -99)
     m_eLeaktruth += edep;
-  if (type == -92)
-    m_eInvisible_s100 += edep;
-  if (type == -91)
-    m_eInvisible_s1000 += edep;
   if (type == -90)
     m_eInvisible += edep;
   if (type == -1)
@@ -552,23 +540,10 @@ void CaloTree::accumulateEnergy(double edep, int type = 0)
     m_eCentruth += edep;
 }
 
-void CaloTree::accumulateDeposits(double edep, int step)
-{
-  if (step < 0)
-    step = 0;
-  if (step >= 200)
-    step = 199;
-  m_eDEPs[step] += edep;
-}
-
 // ########################################################################
 void CaloTree::analyze()
 {
-
   // cout<<"CaloTree::analyze() is called..."<<endl;
-
-  // if(true) return;
-
   double calibSen2 = 100.0 / getParamF("calibSen");
   double calibSph2 = 100.0 / getParamF("calibSph");
   double calibCen2 = 100.0 / getParamF("calibCen");

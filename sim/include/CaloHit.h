@@ -24,6 +24,8 @@ public:
    double globaltime;
    double localtime;
    double edep;
+   double edepNonIon;
+   double edepInv;
    double edepbirk;
    double ncer;    // number of cerenkov photons
    double ncercap; // number of cerenkov photons
