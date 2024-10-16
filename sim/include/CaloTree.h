@@ -18,6 +18,7 @@ class TH1D;
 class TH2D;
 
 class CaloHit;
+struct PhotonInfo;
 
 using namespace std;
 
@@ -47,6 +48,8 @@ public:
   std::map<std::string, TH1D *>::iterator histo1Diter;
   std::map<std::string, TH2D *> histo2D;
   std::map<std::string, TH2D *>::iterator histo2Diter;
+
+  vector<PhotonInfo> photonData;
 
 private:
   // private functions.
@@ -187,6 +190,24 @@ private:
   vector<int> m_tslice3dCC;
   vector<float> m_ph3dCC; //  number of photons
   float m_sum3dCC;
+
+  // optical photon hit variables
+  int mP_nOPs;
+  vector<int> mP_trackid;
+  vector<double> mP_pos_produced_x;
+  vector<double> mP_pos_produced_y;
+  vector<double> mP_pos_produced_z;
+  vector<double> mP_mom_produced_x;
+  vector<double> mP_mom_produced_y;
+  vector<double> mP_mom_produced_z;
+  vector<double> mP_time_produced;
+  vector<double> mP_pos_final_x;
+  vector<double> mP_pos_final_y;
+  vector<double> mP_pos_final_z;
+  vector<double> mP_mom_final_x;
+  vector<double> mP_mom_final_y;
+  vector<double> mP_mom_final_z;
+  vector<double> mP_time_final;
 };
 
 #endif

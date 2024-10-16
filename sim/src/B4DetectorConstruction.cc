@@ -115,13 +115,10 @@ void B4DetectorConstruction::DefineMaterials()
     h_scintillator->AddMaterial(mat_C, 0.91512109);
     h_scintillator->AddMaterial(mat_H, 0.084878906);
 
-    std::cout << "B4DetectorConstruction::DefineMaterials()... start3..." << std::endl;
     // Liquid argon material
     G4double a; // mass of a mole;
     G4double z; // z=mean number of protons;
     G4double density;
-    new G4Material("liquidArgon", z = 18., a = 39.95 * g / mole, density = 1.390 * g / cm3);
-    // The argon by NIST Manager is a gas with a different density
 
     std::cout << "B4DetectorConstruction::DefineMaterials()... start4..." << std::endl;
     // Vacuum
@@ -164,9 +161,9 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     //   chts[100]
     //
     // Geometry parameters
-    double fiberLength = 20.0 * cm;
-    double holeDiameter = 2.5 * cm;
-    double rodSize = 4.0 * cm;
+    double fiberLength = 100.0 * cm;
+    double holeDiameter = 0.25 * cm;
+    double rodSize = 0.4 * cm;
     double noLayers = 1;
     double layerThickness = rodSize;
     double noRods = 1;
@@ -175,9 +172,9 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     double calorSizeY = rodSize * noLayers;
     double calorSizeZ = fiberLength;
 
-    double worldSizeX = 1.01 * calorSizeX;
-    double worldSizeY = 1.01 * calorSizeY;
-    double worldSizeZ = 1.01 * calorSizeZ;
+    double worldSizeX = 1.4 * calorSizeX;
+    double worldSizeY = 1.4 * calorSizeY;
+    double worldSizeZ = 1.2 * calorSizeZ;
 
     double density;
     int ncomponentsbrass;
@@ -394,26 +391,26 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     G4Material *core_S_Material = polystyrene;
 
     // Parameters for fibers
-    double clad_C_rMin = 0.39 * cm;       // cladding cherenkov minimum radius
-    double clad_C_rMax = 0.40 * cm;       // cladding cherenkov max radius
+    double clad_C_rMin = 0.39 * mm;       // cladding cherenkov minimum radius
+    double clad_C_rMax = 0.40 * mm;       // cladding cherenkov max radius
     double clad_C_Dz = fiberLength / 2.0; // cladding cherenkov lenght
     // double clad_C_Sphi = 0.;              // cladding cherenkov min rotation
     //  double clad_C_Dphi = 2. * M_PI;       // cladding chrenkov max rotation
 
-    double core_C_rMin = 0. * cm;
-    double core_C_rMax = 0.39 * cm;
+    double core_C_rMin = 0. * mm;
+    double core_C_rMax = 0.39 * mm;
     double core_C_Dz = clad_C_Dz;
     // double core_C_Sphi = 0.;
     //  double core_C_Dphi = 2. * M_PI;
 
-    double clad_S_rMin = 0.39 * cm;
-    double clad_S_rMax = 0.40 * cm;
+    double clad_S_rMin = 0.39 * mm;
+    double clad_S_rMax = 0.40 * mm;
     double clad_S_Dz = clad_C_Dz;
     // double clad_S_Sphi = 0.;
     // double clad_S_Dphi = 2. * M_PI;
 
-    double core_S_rMin = 0. * cm;
-    double core_S_rMax = 0.39 * cm;
+    double core_S_rMin = 0. * mm;
+    double core_S_rMax = 0.39 * mm;
     double core_S_Dz = clad_C_Dz;
     // double core_S_Sphi = 0.;
     //  double core_S_Dphi = 2. * M_PI;
