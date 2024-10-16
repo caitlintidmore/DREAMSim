@@ -365,9 +365,12 @@ void CaloTree::EndEvent()
     m_nhitstruth = m_pidtruth.size();
 
     // optical photon hits
-    mP_nOPs = photonData.size();
+    int nOPs = 0;
     for (auto const photon : photonData)
     {
+      if (photon.exitTime == 0.0)
+        continue;
+      nOPs++;
       mP_trackid.push_back(photon.trackID);
       mP_pos_produced_x.push_back(photon.productionPosition.x());
       mP_pos_produced_y.push_back(photon.productionPosition.y());
@@ -384,6 +387,7 @@ void CaloTree::EndEvent()
       mP_time_produced.push_back(photon.productionTime);
       mP_time_final.push_back(photon.exitTime);
     }
+    mP_nOPs = nOPs;
 
     //
     tree->Fill();

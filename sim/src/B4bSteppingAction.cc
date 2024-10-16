@@ -110,9 +110,9 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       // Add to photon data
       PhotonInfo photon;
       photon.trackID = trackID;
-      photon.productionPosition = productionPosition;
-      photon.productionMomentum = track->GetMomentum();
-      photon.productionTime = track->GetGlobalTime();
+      photon.productionPosition = productionPosition / cm;
+      photon.productionMomentum = track->GetMomentum() / GeV;
+      photon.productionTime = track->GetGlobalTime() / ns;
 
       // Save initial data, exit info will be filled later
       hh->photonData.push_back(photon);
@@ -121,6 +121,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
     // Check if the photon is leaving the detector to the world
     if (postStepPoint->GetTouchableHandle()->GetVolume() && postStepPoint->GetTouchableHandle()->GetVolume()->GetName() == "World")
     {
+      // std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
       G4ThreeVector exitPosition = postStepPoint->GetPosition();
       G4ThreeVector exitMomentum = track->GetMomentum();
 
@@ -129,9 +130,10 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       {
         if (photon.trackID == trackID)
         {
-          photon.exitPosition = exitPosition;
-          photon.exitMomentum = exitMomentum;
-          photon.exitTime = track->GetGlobalTime();
+          // std::cout << "Photon " << trackID << " found in container. Updating exit info. Left x " << exitPosition.x() << " y " << exitPosition.y() << " z " << exitPosition.z() << std::endl;
+          photon.exitPosition = exitPosition / cm;
+          photon.exitMomentum = exitMomentum / GeV;
+          photon.exitTime = track->GetGlobalTime() / ns;
           break;
         }
       }

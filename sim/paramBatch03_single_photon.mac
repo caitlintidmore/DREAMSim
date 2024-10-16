@@ -18,8 +18,8 @@
 #$$$ gun_x_max         0.05     (cm)
 #$$$ gun_y_min         -0.05     (cm)   -2.5 +/- 0.5 cm
 #$$$ gun_y_max         0.05     (cm)
-#$$$ gun_z_min        -102.0     (cm)
-#$$$ gun_z_max        -102.0     (cm)
+#$$$ gun_z_min        -52.0     (cm)
+#$$$ gun_z_max        -52.0     (cm)
 #$$$ pMomentum_x      0.001
 #$$$ pMomentum_y      0.001
 #$$$ pMomentum_z      1.0
@@ -33,8 +33,8 @@
 #$$$ gridSizeX        3      (grid count) - value hard coded in CaloID for now
 #$$$ gridSizeY        4      (grid count) - value hard coded in CaloID for now
 #$$$ gridSizeT       50.0    (pico sec)   - value hard coded in CaloID for now
-#$$$ caloRotationX    2.0      (degree)   def 2.0
-#$$$ caloRotationY    2.0      (degree)   def 2.0
+#$$$ caloRotationX    0.0      (degree)   def 2.0
+#$$$ caloRotationY    0.0      (degree)   def 2.0
 #$$$ calibSen        1.766   (edep in MeV for 100 GeV e+, 2 deg)  with 0.0001 MeV cut
 #$$$ calibCen        2.764   (edep in MeV for 100 GeV e+, 2 deg)  
 #$$$ calibCph        4659.  (number of chrenkov photons for 100 GeV e+, 2 deg)
