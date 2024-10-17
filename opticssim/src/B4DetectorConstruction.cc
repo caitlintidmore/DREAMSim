@@ -115,13 +115,10 @@ void B4DetectorConstruction::DefineMaterials()
     h_scintillator->AddMaterial(mat_C, 0.91512109);
     h_scintillator->AddMaterial(mat_H, 0.084878906);
 
-    std::cout << "B4DetectorConstruction::DefineMaterials()... start3..." << std::endl;
     // Liquid argon material
     G4double a; // mass of a mole;
     G4double z; // z=mean number of protons;
     G4double density;
-    new G4Material("liquidArgon", z = 18., a = 39.95 * g / mole, density = 1.390 * g / cm3);
-    // The argon by NIST Manager is a gas with a different density
 
     std::cout << "B4DetectorConstruction::DefineMaterials()... start4..." << std::endl;
     // Vacuum
@@ -164,12 +161,12 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     //   chts[100]
     //
     // Geometry parameters
-    double fiberLength = 200.0 * cm;
+    double fiberLength = 100.0 * cm;
     double holeDiameter = 0.25 * cm;
     double rodSize = 0.4 * cm;
-    double noLayers = 80.0;
+    double noLayers = 1;
     double layerThickness = rodSize;
-    double noRods = 90.0;
+    double noRods = 1;
 
     double calorSizeX = rodSize * noRods;
     double calorSizeY = rodSize * noLayers;
@@ -468,14 +465,14 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     //
     // worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
-    worldLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0)));  // blue
-    calorLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0)));  // red
-    layerLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 1.0, 0.0))); // green
-    rodLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 0.0, 0.0)));   // blue
+    worldLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0, 0.5)));  // blue
+    calorLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0, 0.1)));  // red
+    layerLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 1.0, 0.0, 0.6))); // green
+    rodLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 0.0, 0.0, 0.6)));   // blue
     // holeLV->SetVisAttributes(new G4VisAttributes(FALSE,G4Colour(1.0,1.0,1.0))); // black
-    holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 1.0, 0.0)));    // black
-    fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0))); // blue
-    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0))); // red
+    holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 1.0, 1.0, 0.5))); // white
+    fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.8, 0.5, 0.8, 0.9)));
+    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.5, 0.8, 0.9))); // red
 
     std::cout << "B4DetectorConstruction::DefineVolumes()...  endss..." << std::endl;
     //

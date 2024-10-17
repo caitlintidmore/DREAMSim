@@ -25,6 +25,7 @@
 
 #include "CaloHit.h"
 #include "CaloID.h"
+#include "PhotonInfo.h"
 
 using namespace std;
 
@@ -234,6 +235,23 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("tslice3dCC", &m_tslice3dCC);
   tree->Branch("ph3dCC", &m_ph3dCC);
   tree->Branch("sum3dCC", &m_sum3dCC);
+
+  tree->Branch("nOPs", &mP_nOPs);
+  tree->Branch("OP_trackid", &mP_trackid);
+  tree->Branch("OP_pos_produced_x", &mP_pos_produced_x);
+  tree->Branch("OP_pos_produced_y", &mP_pos_produced_y);
+  tree->Branch("OP_pos_produced_z", &mP_pos_produced_z);
+  tree->Branch("OP_mom_produced_x", &mP_mom_produced_x);
+  tree->Branch("OP_mom_produced_y", &mP_mom_produced_y);
+  tree->Branch("OP_mom_produced_z", &mP_mom_produced_z);
+  tree->Branch("OP_pos_final_x", &mP_pos_final_x);
+  tree->Branch("OP_pos_final_y", &mP_pos_final_y);
+  tree->Branch("OP_pos_final_z", &mP_pos_final_z);
+  tree->Branch("OP_mom_final_x", &mP_mom_final_x);
+  tree->Branch("OP_mom_final_y", &mP_mom_final_y);
+  tree->Branch("OP_mom_final_z", &mP_mom_final_z);
+  tree->Branch("OP_time_produced", &mP_time_produced);
+  tree->Branch("OP_time_final", &mP_time_final);
 }
 
 // ########################################################################
@@ -345,6 +363,32 @@ void CaloTree::EndEvent()
     m_nhits3dSS = m_ph3dSS.size();
 
     m_nhitstruth = m_pidtruth.size();
+
+    // optical photon hits
+    int nOPs = 0;
+    for (auto const photon : photonData)
+    {
+      if (photon.exitTime == 0.0)
+        continue;
+      nOPs++;
+      mP_trackid.push_back(photon.trackID);
+      mP_pos_produced_x.push_back(photon.productionPosition.x());
+      mP_pos_produced_y.push_back(photon.productionPosition.y());
+      mP_pos_produced_z.push_back(photon.productionPosition.z());
+      mP_mom_produced_x.push_back(photon.productionMomentum.x());
+      mP_mom_produced_y.push_back(photon.productionMomentum.y());
+      mP_mom_produced_z.push_back(photon.productionMomentum.z());
+      mP_pos_final_x.push_back(photon.exitPosition.x());
+      mP_pos_final_y.push_back(photon.exitPosition.y());
+      mP_pos_final_z.push_back(photon.exitPosition.z());
+      mP_mom_final_x.push_back(photon.exitMomentum.x());
+      mP_mom_final_y.push_back(photon.exitMomentum.y());
+      mP_mom_final_z.push_back(photon.exitMomentum.z());
+      mP_time_produced.push_back(photon.productionTime);
+      mP_time_final.push_back(photon.exitTime);
+    }
+    mP_nOPs = nOPs;
+
     //
     tree->Fill();
     std::cout << "Look into energy deposition in the calorimeter..." << std::endl;
@@ -448,6 +492,23 @@ void CaloTree::clearCaloTree()
   m_tslice3dCC.clear();
   m_ph3dCC.clear();
   m_sum3dCC = 0.0;
+
+  mP_nOPs = 0;
+  mP_trackid.clear();
+  mP_pos_produced_x.clear();
+  mP_pos_produced_y.clear();
+  mP_pos_produced_z.clear();
+  mP_mom_produced_x.clear();
+  mP_mom_produced_y.clear();
+  mP_mom_produced_z.clear();
+  mP_pos_final_x.clear();
+  mP_pos_final_y.clear();
+  mP_pos_final_z.clear();
+  mP_mom_final_x.clear();
+  mP_mom_final_y.clear();
+  mP_mom_final_z.clear();
+  mP_time_produced.clear();
+  mP_time_final.clear();
 }
 
 // ########################################################################

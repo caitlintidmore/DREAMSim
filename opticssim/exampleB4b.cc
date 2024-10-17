@@ -29,6 +29,7 @@
 
 // #include "G4RunManagerFactory.hh"
 #include "G4RunManager.hh"
+#include "G4MTRunManager.hh"
 #include "G4UImanager.hh"
 // #include "FTFP_BERT.hh"
 #include "QGSP_BERT.hh"
@@ -125,6 +126,7 @@ int main(int argc, char **argv)
   //
   // auto* runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::SerialOnly);
   auto *runManager = new G4RunManager;
+  // auto *runManager = new G4MTRunManager;
 
   // Set mandatory initialization classes
   //
@@ -162,6 +164,7 @@ int main(int argc, char **argv)
   auto stepping_action = new B4bSteppingAction(event_action, histo);
   runManager->SetUserAction(stepping_action);
 
+  // runManager->SetNumberOfThreads(4);
   runManager->Initialize();
   // auto actionInitialization = new B4bActionInitialization(detConstruction);
   // runManager->SetUserInitialization(actionInitialization);
