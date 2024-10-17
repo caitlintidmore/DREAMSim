@@ -11,17 +11,17 @@
 #$$$ saveTruthHits true    (true or false)
 
 
-#$$$ gun_particle     e+      (pi+ mu+ e+ etc)
+#$$$ gun_particle     opticalphoton      (pi+ mu+ e+ etc)
 #$$$ gun_energy_min   1.0     (GeV)
 #$$$ gun_energy_max   1.0    (GeV)
-#$$$ gun_x_min         -0.5     (cm)   2.5 =/- 0.5 cm
-#$$$ gun_x_max         0.5     (cm)
-#$$$ gun_y_min         -0.5     (cm)   -2.5 +/- 0.5 cm
-#$$$ gun_y_max         0.5     (cm)
-#$$$ gun_z_min        -11.0     (cm)
-#$$$ gun_z_max        -11.0     (cm)
-#$$$ pMomentum_x      0.001
-#$$$ pMomentum_y      0.001
+#$$$ gun_x_min         -0.0     (cm)   2.5 =/- 0.5 cm
+#$$$ gun_x_max         0.0     (cm)
+#$$$ gun_y_min         -0.0     (cm)   -2.5 +/- 0.5 cm
+#$$$ gun_y_max         0.0     (cm)
+#$$$ gun_z_min        -51.0     (cm)
+#$$$ gun_z_max        -51.0     (cm)
+#$$$ pMomentum_x      0.01
+#$$$ pMomentum_y      0.01
 #$$$ pMomentum_z      1.0
 
 #$$$ csvHits2dSC       0  (number of events to save 2D hits in a csv file)

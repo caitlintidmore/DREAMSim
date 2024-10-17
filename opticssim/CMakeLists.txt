@@ -62,12 +62,8 @@ target_link_libraries(exampleB4b ${ROOT_LIBRARIES})
 set(EXAMPLEB4B_SCRIPTS
   gui.mac
   init_vis.mac
-  run1.mac
-  run2.mac
   vis.mac
-  paramBatch03_single.mac
-  runBatch03_single_param.sh
-  runBatch03_single_param_bg01.sh
+  paramBatch03_single_photon.mac
   )
 
 
