@@ -208,6 +208,12 @@ private:
   vector<double> mP_mom_final_y;
   vector<double> mP_mom_final_z;
   vector<double> mP_time_final;
+  vector<int> mP_productionFiber;
+  vector<int> mP_finalFiber;
+  vector<int> mP_isCerenkov;
+  vector<int> mP_isScintillation;
+  vector<bool> mP_isCerenkovFiber;
+  vector<bool> mP_isScintillationFiber;
   vector<double> mP_pol_x;
   vector<double> mP_pol_y;
   vector<double> mP_pol_z;

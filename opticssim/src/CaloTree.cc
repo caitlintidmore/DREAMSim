@@ -252,6 +252,12 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("OP_mom_final_z", &mP_mom_final_z);
   tree->Branch("OP_time_produced", &mP_time_produced);
   tree->Branch("OP_time_final", &mP_time_final);
+  tree->Branch("OP_isCerenkov", &mP_isCerenkov);
+  tree->Branch("OP_isScintillation", &mP_isScintillation);
+  tree->Branch("OP_productionFiber", &mP_productionFiber);
+  tree->Branch("OP_finalFiber", &mP_finalFiber);
+  tree->Branch("OP_isCerenkovFiber", &mP_isCerenkovFiber);
+  tree->Branch("OP_isScintillationFiber", &mP_isScintillationFiber);
   tree->Branch("OP_pol_x", &mP_pol_x);
   tree->Branch("OP_pol_y", &mP_pol_y);
   tree->Branch("OP_pol_z", &mP_pol_z);
@@ -389,6 +395,12 @@ void CaloTree::EndEvent()
       mP_mom_final_z.push_back(photon.exitMomentum.z());
       mP_time_produced.push_back(photon.productionTime);
       mP_time_final.push_back(photon.exitTime);
+      mP_isCerenkov.push_back(photon.isCerenkov);
+      mP_isScintillation.push_back(photon.isScintillation);
+      mP_productionFiber.push_back(photon.productionFiber);
+      mP_finalFiber.push_back(photon.exitFiber);
+      mP_isCerenkovFiber.push_back(photon.isCerenkovFiber);
+      mP_isScintillationFiber.push_back(photon.isScintillationFiber);
       mP_pol_x.push_back(photon.polarization.x());
       mP_pol_y.push_back(photon.polarization.y());
       mP_pol_z.push_back(photon.polarization.z());
@@ -515,6 +527,12 @@ void CaloTree::clearCaloTree()
   mP_mom_final_z.clear();
   mP_time_produced.clear();
   mP_time_final.clear();
+  mP_isCerenkov.clear();
+  mP_isScintillation.clear();
+  mP_productionFiber.clear();
+  mP_finalFiber.clear();
+  mP_isCerenkovFiber.clear();
+  mP_isScintillationFiber.clear();
   mP_pol_x.clear();
   mP_pol_y.clear();
   mP_pol_z.clear();

@@ -115,6 +115,26 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       photon.productionTime = track->GetGlobalTime() / ns;
       photon.polarization = track->GetPolarization();
 
+      if (track->GetCreatorProcess()->GetProcessName() == "Cerenkov")
+      {
+        photon.isCerenkov = true;
+      }
+      else if (track->GetCreatorProcess()->GetProcessName() == "Scintillation")
+      {
+        photon.isScintillation = true;
+      }
+
+      if (track->GetTouchable()->GetVolume()->GetName() == "fiberCoreScintPhys")
+      {
+        photon.isScintillationFiber = true;
+      }
+      else if (track->GetTouchable()->GetVolume()->GetName() == "fiberCoreCherePhys")
+      {
+        photon.isCerenkovFiber = true;
+      }
+
+      photon.productionFiber = track->GetTouchable()->GetVolume()->GetCopyNo();
+
       // Save initial data, exit info will be filled later
       hh->photonData.push_back(photon);
     }
@@ -135,6 +155,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
           photon.exitPosition = exitPosition / cm;
           photon.exitMomentum = exitMomentum / GeV;
           photon.exitTime = track->GetGlobalTime() / ns;
+          photon.exitFiber = preStepPoint->GetTouchable()->GetVolume()->GetCopyNo();
           break;
         }
       }

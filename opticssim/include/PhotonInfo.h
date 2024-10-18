@@ -11,6 +11,10 @@ struct PhotonInfo
     G4ThreeVector polarization = G4ThreeVector(0, 0, 0);
     G4double productionTime = 0;
     G4double exitTime = 0;
-    G4int productionFiber = -1;
-    G4int exitFiber = -1;
+    G4int productionFiber = -99;
+    G4int exitFiber = -99;
+    G4bool isCerenkov = false;
+    G4bool isScintillation = false;
+    G4bool isCerenkovFiber = false;
+    G4bool isScintillationFiber = false;
 };
