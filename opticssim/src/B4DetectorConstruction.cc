@@ -344,6 +344,7 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     fluorinatedPolymer->AddElement(F, 2);
     G4MaterialPropertiesTable *mpPMMA;
     G4MaterialPropertiesTable *mpFS;
+    G4MaterialPropertiesTable *mpPS;
 
     //--- Generate and add material properties table ---
     G4double PhotonEnergy[] = {2.00 * eV, 2.03 * eV, 2.06 * eV, 2.09 * eV, 2.12 * eV,
@@ -370,6 +371,7 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     mpPMMA = new G4MaterialPropertiesTable();
     mpPMMA->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_PMMA, nEntries);
     pmma->SetMaterialPropertiesTable(mpPMMA);
+    pmma_clad->SetMaterialPropertiesTable(mpPMMA);
 
     //--- Fluorinated Polymer (FS) ---
     G4double RefractiveIndex_FluorinatedPolymer[nEntries] =
@@ -382,6 +384,18 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     mpFS = new G4MaterialPropertiesTable();
     mpFS->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_FluorinatedPolymer, nEntries);
     fluorinatedPolymer->SetMaterialPropertiesTable(mpFS);
+
+    // -- Polystyrene --
+    G4double RefractiveIndex_Polystyrene[nEntries] =
+        {
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59};
+    mpPS = new G4MaterialPropertiesTable();
+    mpPS->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_Polystyrene, nEntries);
+    polystyrene->SetMaterialPropertiesTable(mpPS);
 
     //---Materials for Cerenkov fiber---
     G4Material *clad_C_Material = fluorinatedPolymer;
