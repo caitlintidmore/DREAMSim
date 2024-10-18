@@ -252,6 +252,9 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("OP_mom_final_z", &mP_mom_final_z);
   tree->Branch("OP_time_produced", &mP_time_produced);
   tree->Branch("OP_time_final", &mP_time_final);
+  tree->Branch("OP_pol_x", &mP_pol_x);
+  tree->Branch("OP_pol_y", &mP_pol_y);
+  tree->Branch("OP_pol_z", &mP_pol_z);
 }
 
 // ########################################################################
@@ -386,13 +389,16 @@ void CaloTree::EndEvent()
       mP_mom_final_z.push_back(photon.exitMomentum.z());
       mP_time_produced.push_back(photon.productionTime);
       mP_time_final.push_back(photon.exitTime);
+      mP_pol_x.push_back(photon.polarization.x());
+      mP_pol_y.push_back(photon.polarization.y());
+      mP_pol_z.push_back(photon.polarization.z());
     }
     mP_nOPs = nOPs;
 
     //
     tree->Fill();
-    std::cout << "Look into energy deposition in the calorimeter..." << std::endl;
-    std::cout << "  eCalo=" << m_eCalotruth << "  eWorld=" << m_eWorldtruth << "  eLeak=" << m_eLeaktruth << "  eInvisible=" << m_eInvisible << "  eRod=" << m_eRodtruth << "  eCen=" << m_eCentruth << "  eScin=" << m_eScintruth << " eCalo+eWorld+eLeak+eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + m_eInvisible) << std::endl;
+    // std::cout << "Look into energy deposition in the calorimeter..." << std::endl;
+    // std::cout << "  eCalo=" << m_eCalotruth << "  eWorld=" << m_eWorldtruth << "  eLeak=" << m_eLeaktruth << "  eInvisible=" << m_eInvisible << "  eRod=" << m_eRodtruth << "  eCen=" << m_eCentruth << "  eScin=" << m_eScintruth << " eCalo+eWorld+eLeak+eInvisible=" << (m_eCalotruth + m_eWorldtruth + m_eLeaktruth + m_eInvisible) << std::endl;
   } //  end of if((eventCounts-1)<getParamI("eventsInNtupe"))
 
   //   analyze this event.
@@ -509,6 +515,10 @@ void CaloTree::clearCaloTree()
   mP_mom_final_z.clear();
   mP_time_produced.clear();
   mP_time_final.clear();
+  mP_pol_x.clear();
+  mP_pol_y.clear();
+  mP_pol_z.clear();
+
   photonData.clear();
 }
 

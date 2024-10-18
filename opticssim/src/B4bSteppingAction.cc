@@ -113,6 +113,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       photon.productionPosition = productionPosition / cm;
       photon.productionMomentum = track->GetMomentum() / GeV;
       photon.productionTime = track->GetGlobalTime() / ns;
+      photon.polarization = track->GetPolarization();
 
       // Save initial data, exit info will be filled later
       hh->photonData.push_back(photon);

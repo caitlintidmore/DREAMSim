@@ -208,6 +208,9 @@ private:
   vector<double> mP_mom_final_y;
   vector<double> mP_mom_final_z;
   vector<double> mP_time_final;
+  vector<double> mP_pol_x;
+  vector<double> mP_pol_y;
+  vector<double> mP_pol_z;
 };
 
 #endif
