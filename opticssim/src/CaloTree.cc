@@ -509,6 +509,7 @@ void CaloTree::clearCaloTree()
   mP_mom_final_z.clear();
   mP_time_produced.clear();
   mP_time_final.clear();
+  photonData.clear();
 }
 
 // ########################################################################

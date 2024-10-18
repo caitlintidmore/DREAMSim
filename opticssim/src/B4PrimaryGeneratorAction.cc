@@ -180,9 +180,13 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
 
     float en = ((hh->getParamF("gun_energy_max") - hh->getParamF("gun_energy_min")) * G4UniformRand() + hh->getParamF("gun_energy_min")) * GeV;
     string ptype = hh->getParamS("gun_particle");
-    float px = (hh->getParamF("pMomentum_x"));
-    float py = (hh->getParamF("pMomentum_y"));
-    float pz = (hh->getParamF("pMomentum_z"));
+
+    double rp1 = G4UniformRand();
+    double rp2 = G4UniformRand();
+    double rp3 = G4UniformRand();
+    float px = (hh->getParamF("gun_pdx_max") - hh->getParamF("gun_pdx_min")) * G4UniformRand() + hh->getParamF("gun_pdx_min");
+    float py = (hh->getParamF("gun_pdy_max") - hh->getParamF("gun_pdy_min")) * G4UniformRand() + hh->getParamF("gun_pdy_min");
+    float pz = (hh->getParamF("gun_pdz_max") - hh->getParamF("gun_pdz_min")) * G4UniformRand() + hh->getParamF("gun_pdz_min");
 
     G4int nofParticles = 1;
     fParticleGun = new G4ParticleGun(nofParticles);

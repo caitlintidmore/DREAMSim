@@ -10,19 +10,22 @@
 #$$$ miniNtuple    false    (true of false, true to drop some objects to minimize Ntuple.)
 #$$$ saveTruthHits true    (true or false)
 
+#$$$ gun_particle     opticalphoton      (pi+ mu+ e+ etc)
+#$$$ gun_energy_min   0.000001     (GeV)
+#$$$ gun_energy_max   0.000001    (GeV)
+#$$$ gun_x_min         -0.01     (cm)   2.5 =/- 0.5 cm
+#$$$ gun_x_max         0.01     (cm)
+#$$$ gun_y_min         -0.01     (cm)   -2.5 +/- 0.5 cm
+#$$$ gun_y_max         0.01     (cm)
+#$$$ gun_z_min        -50.0     (cm)
+#$$$ gun_z_max        -50.0     (cm)
+#$$$ gun_pdx_min      -0.99
+#$$$ gun_pdx_max      0.99
+#$$$ gun_pdy_min      -0.99
+#$$$ gun_pdy_max      0.99
+#$$$ gun_pdz_min      1.0
+#$$$ gun_pdz_max      1.0
 
-#$$$ gun_particle     e+      (pi+ mu+ e+ etc)
-#$$$ gun_energy_min   1.0     (GeV)
-#$$$ gun_energy_max   1.0    (GeV)
-#$$$ gun_x_min         -0.05     (cm)   2.5 =/- 0.5 cm
-#$$$ gun_x_max         0.05     (cm)
-#$$$ gun_y_min         -0.05     (cm)   -2.5 +/- 0.5 cm
-#$$$ gun_y_max         0.05     (cm)
-#$$$ gun_z_min        -52.0     (cm)
-#$$$ gun_z_max        -52.0     (cm)
-#$$$ pMomentum_x      0.01
-#$$$ pMomentum_y      0.01
-#$$$ pMomentum_z      1.0
 
 #$$$ csvHits2dSC       0  (number of events to save 2D hits in a csv file)
 #$$$ csvHits2dCH       0
