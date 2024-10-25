@@ -64,6 +64,7 @@ set(EXAMPLEB4B_SCRIPTS
   init_vis.mac
   vis.mac
   paramBatch03_single_photon.mac
+  paramBatch03_single_ele.mac
   )
 
 
