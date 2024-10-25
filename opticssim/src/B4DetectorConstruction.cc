@@ -370,6 +370,11 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
             1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49};
     mpPMMA = new G4MaterialPropertiesTable();
     mpPMMA->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_PMMA, nEntries);
+
+    G4double Absorption_PMMA[nEntries];
+    std::fill_n(Absorption_PMMA, nEntries, 5.0 * m);
+    mpPMMA->AddProperty("ABSLENGTH", PhotonEnergy, Absorption_PMMA, nEntries);
+
     pmma->SetMaterialPropertiesTable(mpPMMA);
     pmma_clad->SetMaterialPropertiesTable(mpPMMA);
 
@@ -383,6 +388,11 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
             1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42};
     mpFS = new G4MaterialPropertiesTable();
     mpFS->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_FluorinatedPolymer, nEntries);
+
+    G4double Absorption_FluorinatedPolymer[nEntries];
+    std::fill_n(Absorption_FluorinatedPolymer, nEntries, 10.0 * m);
+    mpFS->AddProperty("ABSLENGTH", PhotonEnergy, Absorption_FluorinatedPolymer, nEntries);
+
     fluorinatedPolymer->SetMaterialPropertiesTable(mpFS);
 
     // -- Polystyrene --
@@ -395,6 +405,10 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
             1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59};
     mpPS = new G4MaterialPropertiesTable();
     mpPS->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_Polystyrene, nEntries);
+    G4double Absorption_Polystyrene[nEntries];
+    std::fill_n(Absorption_Polystyrene, nEntries, 3.0 * m);
+    mpPS->AddProperty("ABSLENGTH", PhotonEnergy, Absorption_Polystyrene, nEntries);
+
     polystyrene->SetMaterialPropertiesTable(mpPS);
 
     //---Materials for Cerenkov fiber---
