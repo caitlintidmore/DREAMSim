@@ -124,13 +124,22 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
         photon.isScintillation = true;
       }
 
-      if (track->GetTouchable()->GetVolume()->GetName() == "fiberCoreScintPhys")
+      auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
+      if (detname == "fiberCoreS")
       {
-        photon.isScintillationFiber = true;
+        photon.isCoreS = true;
       }
-      else if (track->GetTouchable()->GetVolume()->GetName() == "fiberCoreCherePhys")
+      else if (detname == "fiberCoreC")
       {
-        photon.isCerenkovFiber = true;
+        photon.isCoreC = true;
+      }
+      else if (detname == "fiberCladS")
+      {
+        photon.isCladS = true;
+      }
+      else if (detname == "fiberCladC")
+      {
+        photon.isCladC = true;
       }
 
       photon.productionFiber = track->GetTouchable()->GetVolume()->GetCopyNo();

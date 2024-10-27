@@ -212,8 +212,10 @@ private:
   vector<int> mP_finalFiber;
   vector<int> mP_isCerenkov;
   vector<int> mP_isScintillation;
-  vector<bool> mP_isCerenkovFiber;
-  vector<bool> mP_isScintillationFiber;
+  vector<bool> mP_isCoreC;
+  vector<bool> mP_isCoreS;
+  vector<bool> mP_isCladC;
+  vector<bool> mP_isCladS;
   vector<double> mP_pol_x;
   vector<double> mP_pol_y;
   vector<double> mP_pol_z;

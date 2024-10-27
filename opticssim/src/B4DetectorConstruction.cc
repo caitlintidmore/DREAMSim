@@ -454,13 +454,13 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     auto fiberS = new G4Tubs("fiberS", 0, core_S_rMax, fiberLength / 2., 0 * deg, 360. * deg);
 
     auto fiberCLog = new G4LogicalVolume(fiber, clad_C_Material, "fiberCladC");
-    auto fiberSLog = new G4LogicalVolume(fiber, clad_C_Material, "fiberCladS");
+    auto fiberSLog = new G4LogicalVolume(fiber, clad_S_Material, "fiberCladS");
 
     G4LogicalVolume *fiberCoreCLog = new G4LogicalVolume(fiberC, core_C_Material, "fiberCoreC");
     G4LogicalVolume *fiberCoreSLog = new G4LogicalVolume(fiberS, core_S_Material, "fiberCoreS");
 
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreCLog, "fiberCoreCherePhys", fiberCLog, false, 0);
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreSLog, "fiberCoreScintPhys", fiberSLog, false, 0);
+    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreCLog, "fiberCoreCherePhys", fiberCLog, false, 0, fCheckOverlaps);
+    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreSLog, "fiberCoreScintPhys", fiberSLog, false, 0, fCheckOverlaps);
 
     double R = clad_C_rMax * 2.0 + 0.01; // 10 micron gap between cenral and peripheral fibers
     double cx1 = R * cos(30.0 * deg);
@@ -500,7 +500,9 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     // holeLV->SetVisAttributes(new G4VisAttributes(FALSE,G4Colour(1.0,1.0,1.0))); // black
     holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 1.0, 1.0, 0.5))); // white
     fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.8, 0.5, 0.8, 0.9)));
-    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.5, 0.8, 0.9))); // red
+    fiberCoreCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.98, 0.5, 0.98, 0.9)));
+    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.5, 0.8, 0.9)));       // red
+    fiberCoreSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.98, 0.98, 0.9))); // red
 
     std::cout << "B4DetectorConstruction::DefineVolumes()...  endss..." << std::endl;
     //

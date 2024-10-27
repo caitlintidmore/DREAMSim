@@ -15,6 +15,8 @@ struct PhotonInfo
     G4int exitFiber = -99;
     G4bool isCerenkov = false;
     G4bool isScintillation = false;
-    G4bool isCerenkovFiber = false;
-    G4bool isScintillationFiber = false;
+    G4bool isCoreC = false;
+    G4bool isCoreS = false;
+    G4bool isCladC = false;
+    G4bool isCladS = false;
 };
