@@ -48,7 +48,10 @@ for part, _ in loops:
 
 histos = OrderedDict()
 figures = ["nOPs", "OP_time_produced", "OP_time_final", "OP_time_delta", "OP_pos_delta_z", "OP_time_per_meter",
-           "OP_pos_produced_x_vs_y", "OP_pos_final_x_vs_y", "OP_mom_produced_x_vs_y", "OP_mom_final_x_vs_y"]
+           "OP_pos_produced_x_vs_y", "OP_pos_final_x_vs_y", "OP_mom_produced_x_vs_y", "OP_mom_final_x_vs_y",
+           "OP_profilePx_produced_x_vs_y", "OP_profilePy_produced_x_vs_y",
+           "OP_profilePx_final_x_vs_y", "OP_profilePy_final_x_vs_y"
+           ]
 # for event displays
 evtlist = [1, 3, 5, 10, 15]
 evtlist = []
@@ -62,6 +65,7 @@ for fig in figures:
     histos[fig] = OrderedDict()
 
 x_range = 0.15
+nx_bins = 100
 px_range = 4e-9
 t_range = 20
 
@@ -82,13 +86,18 @@ for part, rdf in rdfs.items():
         ("OP_time_per_meter" + suffix, "OP_time_per_meter", 100, 0, 12.0), "OP_time_per_meter", "eWeight")
 
     histos["OP_pos_produced_x_vs_y"][part] = rdf.Histo2D(
-        ("OP_pos_produced_x_vs_y" + suffix, "OP_pos_produced_x_vs_y", 50, -x_range, x_range, 50, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "eWeight")
+        ("OP_pos_produced_x_vs_y" + suffix, "OP_pos_produced_x_vs_y", nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "eWeight")
     histos["OP_pos_final_x_vs_y"][part] = rdf.Histo2D(
-        ("OP_pos_final_x_vs_y" + suffix, "OP_pos_final_x_vs_y", 50, -x_range, x_range, 50, -x_range, x_range), "OP_pos_final_x", "OP_pos_final_y", "eWeight")
+        ("OP_pos_final_x_vs_y" + suffix, "OP_pos_final_x_vs_y", nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_final_x", "OP_pos_final_y", "eWeight")
     histos["OP_mom_produced_x_vs_y"][part] = rdf.Histo2D(("OP_mom_produced_x_vs_y" + suffix, "OP_mom_produced_x_vs_y",
-                                                         50, -px_range, px_range, 50, -px_range, px_range), "OP_mom_produced_x", "OP_mom_produced_y", "eWeight")
+                                                         nx_bins, -px_range, px_range, nx_bins, -px_range, px_range), "OP_mom_produced_x", "OP_mom_produced_y", "eWeight")
     histos["OP_mom_final_x_vs_y"][part] = rdf.Histo2D(("OP_mom_final_x_vs_y" + suffix, "OP_mom_final_x_vs_y",
-                                                      50, -px_range, px_range, 50, -px_range, px_range), "OP_mom_final_x", "OP_mom_final_y", "eWeight")
+                                                      nx_bins, -px_range, px_range, nx_bins, -px_range, px_range), "OP_mom_final_x", "OP_mom_final_y", "eWeight")
+    
+    histos["OP_profilePx_produced_x_vs_y"][part] = rdf.Profile2D(("OP_profilePx_produced_x_vs_y" + suffix, "OP_profilePx_produced_x_vs_y",nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "OP_mom_produced_x", "eWeight")
+    histos["OP_profilePy_produced_x_vs_y"][part] = rdf.Profile2D(("OP_profilePy_produced_x_vs_y" + suffix, "OP_profilePy_produced_x_vs_y",nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "OP_mom_produced_y", "eWeight")
+    histos["OP_profilePx_final_x_vs_y"][part] = rdf.Profile2D(("OP_profilePx_final_x_vs_y" + suffix, "OP_profilePx_final_x_vs_y",nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_final_x", "OP_pos_final_y", "OP_mom_final_x", "eWeight")
+    histos["OP_profilePy_final_x_vs_y"][part] = rdf.Profile2D(("OP_profilePy_final_x_vs_y" + suffix, "OP_profilePy_final_x_vs_y",nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_final_x", "OP_pos_final_y", "OP_mom_final_y", "eWeight")
 
     # some event displays
     for i in evtlist:
@@ -107,7 +116,6 @@ colormaps = {
     'pion': 3
 }
 
-
 def GetColors(ene_fracs):
     colors = []
     for str in ene_fracs.keys():
@@ -115,7 +123,6 @@ def GetColors(ene_fracs):
         color = colormaps[part]
         colors.append(color)
     return colors
-
 
 args = {
     'dology': True,
@@ -141,6 +148,31 @@ DrawHistos(list(histos['OP_pos_delta_z'].values()), list(histos['OP_pos_delta_z'
 DrawHistos(list(histos['OP_time_per_meter'].values()), list(histos['OP_time_per_meter'].keys(
 )), 0, 12, "Time [ns/m]", 1e-1, 1e7, "Fraction of events", "OP_time_per_meter", **args)
 
+def makeArrowPlots(hprof2d_x, hprof2d_y, min_entries=1, min_value= 1e-10, scale = 1e7):
+    # assumes hprof2d_x and hprof2d_y have same binning
+    arrows = []
+    nbinsX = hprof2d_x.GetNbinsX()
+    nbinsY = hprof2d_x.GetNbinsY()
+    for i in range(1, nbinsX+1):
+        for j in range(1, nbinsY+1):
+            bin_ij = hprof2d_x.GetBin(i, j)
+            if hprof2d_x.GetBinEffectiveEntries(bin_ij) <= min_entries:
+                continue
+            avg_px = hprof2d_x.GetBinContent(i, j)
+            avg_py = hprof2d_y.GetBinContent(i, j)
+            avg_pxy = (avg_px**2 + avg_py**2)**0.5
+            if avg_pxy <= min_value:
+                continue
+            
+            x = hprof2d_x.GetXaxis().GetBinCenter(i)
+            y = hprof2d_x.GetYaxis().GetBinCenter(j)
+            dx = avg_px * scale
+            dy = avg_py * scale
+            arrow = ROOT.TArrow(x, y, x+dx, y+dy, 0.01, "|>")
+            arrow.SetLineColor(ROOT.kPink)
+            arrow.SetFillColor(ROOT.kPink)
+            arrows.append(arrow)
+    return arrows
 
 # 2D plots
 args['dology'] = False
@@ -160,7 +192,14 @@ for part in rdfs.keys():
                "px [GeV/c]", -px_range, px_range, "py [GeV/c]", f"OP_mom_produced_x_vs_y_{part}", **args)
     DrawHistos([histos['OP_mom_final_x_vs_y'][part]], [], -px_range, px_range,
                "px [GeV/c]", -px_range, px_range, "py [GeV/c]", f"OP_mom_final_x_vs_y_{part}", **args)
-
+    
+    # profile plots
+    arrows = makeArrowPlots(histos['OP_profilePx_produced_x_vs_y'][part].GetValue(), histos['OP_profilePy_produced_x_vs_y'][part].GetValue())
+    DrawHistos([histos['OP_pos_produced_x_vs_y'][part]], [], -x_range, x_range,"x [cm]", -x_range, x_range, "y [cm]", f"OP_produced_x_vs_y_{part}_withPXY", **args, extraToDraw = arrows)
+    
+    arrows = makeArrowPlots(histos['OP_profilePx_final_x_vs_y'][part].GetValue(), histos['OP_profilePy_final_x_vs_y'][part].GetValue(), scale=3e7)
+    DrawHistos([histos['OP_pos_final_x_vs_y'][part]], [], -x_range, x_range,"x [cm]", -x_range, x_range, "y [cm]", f"OP_final_x_vs_y_{part}_withPXY", **args, extraToDraw = arrows)
+    
     # event displays
     for i in evtlist:
         DrawHistos([histos[f"event_{i}_OP_pos_produced_x_vs_y"][part]], [], -x_range, x_range,
