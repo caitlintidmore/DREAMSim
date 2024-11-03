@@ -10,7 +10,6 @@
 #$$$ miniNtuple    false    (true of false, true to drop some objects to minimize Ntuple.)
 #$$$ saveTruthHits true    (true or false)
 
-
 #$$$ gun_particle     e+      (pi+ mu+ e+ etc)
 #$$$ gun_energy_min   1.0     (GeV)
 #$$$ gun_energy_max   1.0    (GeV)
