@@ -200,7 +200,7 @@ void B4PrimaryGeneratorAction::GeneratePrimaries(G4Event *anEvent)
     // cout<<"B4PrimaryGeneratorAction::GeneratePrimaries set a particle..."<<endl;
     // cout<<"   (x,y,z,en)="<<x<<",  "<<y<<",  "<<z<<",  "<<en<<",  "<<ptype<<endl;
     int pdgid = particleDefinition->GetPDGEncoding();
-    auto part_mom = fParticleGun->GetParticleMomentum();
+    auto part_mom = fParticleGun->GetParticleMomentumDirection();
     auto part_pos = fParticleGun->GetParticlePosition();
     auto part_E = fParticleGun->GetParticleEnergy();
     hh->saveBeamXYZPxPyPzE(ptype, pdgid, part_pos.x(), part_pos.y(), part_pos.z(), part_mom.x(), part_mom.y(), part_mom.z(), part_E);

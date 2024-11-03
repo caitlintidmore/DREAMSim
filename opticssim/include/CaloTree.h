@@ -40,7 +40,7 @@ public:
   //  called fro SteppingAction...
   void accumulateHits(CaloHit aHit);
   void accumulateEnergy(double eleak, int type);
-  void saveBeamXYZPxPyPzE(string, int, float, float, float, float, float, float, float);
+  void saveBeamXYZPxPyPzE(string, int, double, double, double, double, double, double, double);
 
   // for histogrming...
   std::string title;
@@ -128,13 +128,13 @@ private:
   float m_calibCph;
 
   int m_beamID; //  pdg ID
-  float m_beamX;
-  float m_beamY;
-  float m_beamZ;
-  float m_beamE;
-  float m_beamPx;
-  float m_beamPy;
-  float m_beamPz;
+  double m_beamX;
+  double m_beamY;
+  double m_beamZ;
+  double m_beamE;
+  double m_beamPx;
+  double m_beamPy;
+  double m_beamPz;
   string m_beamType;
 
   // truth hit variables (no sipm or time or position smearing applied)
