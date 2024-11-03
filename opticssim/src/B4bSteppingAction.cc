@@ -115,13 +115,17 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       photon.productionTime = track->GetGlobalTime() / ns;
       photon.polarization = track->GetPolarization();
 
-      if (track->GetCreatorProcess()->GetProcessName() == "Cerenkov")
+      auto *creatorProcess = track->GetCreatorProcess();
+      if (creatorProcess)
       {
-        photon.isCerenkov = true;
-      }
-      else if (track->GetCreatorProcess()->GetProcessName() == "Scintillation")
-      {
-        photon.isScintillation = true;
+        if (creatorProcess->GetProcessName() == "Cerenkov")
+        {
+          photon.isCerenkov = true;
+        }
+        else if (creatorProcess->GetProcessName() == "Scintillation")
+        {
+          photon.isScintillation = true;
+        }
       }
 
       auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
