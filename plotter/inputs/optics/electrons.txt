@@ -1,1 +1,1 @@
-/home/yofeng/CaloX/outputs/optics/mc_testjob_run001_003_Test_20evt_e+_100.0_100.0.root
+/home/yfeng/Desktop/TTU/CaloX/Dream/Sim/dream2.06/opticssim/build/mc_testjob_run001_003_Test_10evt_e+_10.0_10.0.root

@@ -181,6 +181,9 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("beamX", &m_beamX);
   tree->Branch("beamY", &m_beamY);
   tree->Branch("beamZ", &m_beamZ);
+  tree->Branch("beamPx", &m_beamPx);
+  tree->Branch("beamPy", &m_beamPy);
+  tree->Branch("beamPz", &m_beamPz);
   tree->Branch("beamE", &m_beamE);
   tree->Branch("beamID", &m_beamID);
   tree->Branch("beamType", &m_beamType);
@@ -305,13 +308,6 @@ void CaloTree::EndEvent()
     m_calibCen = getParamF("calibCen");
     m_calibCph = getParamF("calibCph");
 
-    m_beamX = beamX;
-    m_beamY = beamY;
-    m_beamZ = beamZ;
-    m_beamE = beamE;
-    m_beamID = beamID;
-    m_beamType = beamType;
-
     //  CC:  Cherenkov hits (ncer)
     m_sum3dCC = 0.0;
     for (auto itr = ctHits.begin(); itr != ctHits.end(); itr++)
@@ -428,15 +424,18 @@ void CaloTree::EndJob()
   fout->Close();
 }
 // ########################################################################
-void CaloTree::saveBeamXYZE(string ptype, int pdgid, float x, float y, float z,
-                            float en)
+void CaloTree::saveBeamXYZPxPyPzE(string ptype, int pdgid, float x, float y, float z,
+                                  float px, float py, float pz, float en)
 {
-  beamType = ptype; // sting pi+. e+ mu+ etc.
-  beamID = pdgid;
-  beamX = x; // in mm
-  beamY = y;
-  beamZ = z;
-  beamE = en; // in MeV
+  m_beamType = ptype; // sting pi+. e+ mu+ etc.
+  m_beamID = pdgid;
+  m_beamX = x; // in mm
+  m_beamY = y;
+  m_beamZ = z;
+  m_beamPx = px; // in MeV
+  m_beamPy = py;
+  m_beamPz = pz;
+  m_beamE = en; // in MeV
 }
 
 // ########################################################################
@@ -460,6 +459,9 @@ void CaloTree::clearCaloTree()
   m_beamY = 0.0;
   m_beamZ = 0.0;
   m_beamE = 0.0;
+  m_beamPx = 0.0;
+  m_beamPy = 0.0;
+  m_beamPz = 0.0;
   m_beamID = 0;
   m_beamType = " ";
 
@@ -911,8 +913,8 @@ void CaloTree::writeCSV(string type, map<int, double> &hits)
          << endl;
   }
 
-  *(fcsv[type]) << eventCountsALL << "," << beamX << "," << beamY << ","
-                << beamZ << "," << beamE << "," << beamType << "," << sum << ","
+  *(fcsv[type]) << eventCountsALL << "," << m_beamX << "," << m_beamY << ","
+                << m_beamZ << "," << m_beamE << "," << m_beamType << "," << sum << ","
                 << nhits;
 
   for (const auto &n : hits)

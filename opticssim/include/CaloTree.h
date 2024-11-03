@@ -40,7 +40,7 @@ public:
   //  called fro SteppingAction...
   void accumulateHits(CaloHit aHit);
   void accumulateEnergy(double eleak, int type);
-  void saveBeamXYZE(string, int, float, float, float, float);
+  void saveBeamXYZPxPyPzE(string, int, float, float, float, float, float, float, float);
 
   // for histogrming...
   std::string title;
@@ -66,9 +66,6 @@ private:
   void defineCSV(string type);
   void writeCSV(string type, map<int, double> &hits);
 
-  string beamType;
-  int beamID;
-  float beamX, beamY, beamZ, beamE;
   //
   string runConfig;
   int runNumber;
@@ -135,6 +132,9 @@ private:
   float m_beamY;
   float m_beamZ;
   float m_beamE;
+  float m_beamPx;
+  float m_beamPy;
+  float m_beamPz;
   string m_beamType;
 
   // truth hit variables (no sipm or time or position smearing applied)
