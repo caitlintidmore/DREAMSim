@@ -455,15 +455,15 @@ void CaloTree::clearCaloTree()
   // mNyCell=0;
   // mHepPy.clear();     // GeV
 
-  m_beamX = 0.0;
-  m_beamY = 0.0;
-  m_beamZ = 0.0;
-  m_beamE = 0.0;
-  m_beamPx = 0.0;
-  m_beamPy = 0.0;
-  m_beamPz = 0.0;
-  m_beamID = 0;
-  m_beamType = " ";
+  // m_beamX = 0.0;
+  // m_beamY = 0.0;
+  // m_beamZ = 0.0;
+  // m_beamE = 0.0;
+  // m_beamPx = 0.0;
+  // m_beamPy = 0.0;
+  // m_beamPz = 0.0;
+  // m_beamID = 0;
+  // m_beamType = " ";
 
   m_nhitstruth = 0;
   m_pidtruth.clear();
