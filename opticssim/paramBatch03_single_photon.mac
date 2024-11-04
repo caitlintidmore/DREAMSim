@@ -13,12 +13,12 @@
 #$$$ gun_particle     opticalphoton      (pi+ mu+ e+ etc)
 #$$$ gun_energy_min   0.000001     (GeV)
 #$$$ gun_energy_max   0.000001    (GeV)
-#$$$ gun_x_min         -0.15     (cm)   2.5 =/- 0.5 cm
-#$$$ gun_x_max         0.15     (cm)
-#$$$ gun_y_min         -0.15     (cm)   -2.5 +/- 0.5 cm
-#$$$ gun_y_max         0.15     (cm)
-#$$$ gun_z_min        -50.0     (cm)
-#$$$ gun_z_max        -50.0     (cm)
+#$$$ gun_x_min         -0.040     (cm)   2.5 =/- 0.5 cm
+#$$$ gun_x_max         0.040     (cm)
+#$$$ gun_y_min         -0.040     (cm)   -2.5 +/- 0.5 cm
+#$$$ gun_y_max         0.040     (cm)
+#$$$ gun_z_min        -49.0     (cm)
+#$$$ gun_z_max        -49.0     (cm)
 #$$$ gun_pdx_min      -0.5
 #$$$ gun_pdx_max      0.5
 #$$$ gun_pdy_min      -0.5
