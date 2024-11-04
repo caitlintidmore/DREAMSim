@@ -13,18 +13,18 @@
 #$$$ gun_particle     opticalphoton      (pi+ mu+ e+ etc)
 #$$$ gun_energy_min   0.000001     (GeV)
 #$$$ gun_energy_max   0.000001    (GeV)
-#$$$ gun_x_min         -0.040     (cm)   2.5 =/- 0.5 cm
-#$$$ gun_x_max         0.040     (cm)
-#$$$ gun_y_min         -0.040     (cm)   -2.5 +/- 0.5 cm
-#$$$ gun_y_max         0.040     (cm)
+#$$$ gun_x_min         -0.035809     (cm)   2.5 =/- 0.5 cm
+#$$$ gun_x_max         -0.035807     (cm)
+#$$$ gun_y_min         -0.013893     (cm)   -2.5 +/- 0.5 cm
+#$$$ gun_y_max         -0.013891  (cm)
 #$$$ gun_z_min        -49.0     (cm)
 #$$$ gun_z_max        -49.0     (cm)
-#$$$ gun_pdx_min      -1.5
-#$$$ gun_pdx_max      1.5
-#$$$ gun_pdy_min      -1.5
-#$$$ gun_pdy_max      1.5
-#$$$ gun_pdz_min      1.0
-#$$$ gun_pdz_max      1.0
+#$$$ gun_pdx_min      -1.50e-10
+#$$$ gun_pdx_max      -1.48e-10
+#$$$ gun_pdy_min      2.181e-09
+#$$$ gun_pdy_max      2.183e-09
+#$$$ gun_pdz_min      2.141e-09
+#$$$ gun_pdz_max      2.145e-09
 
 
 #$$$ csvHits2dSC       0  (number of events to save 2D hits in a csv file)
