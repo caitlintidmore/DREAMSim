@@ -375,8 +375,8 @@ void CaloTree::EndEvent()
     int nOPs = 0;
     for (auto const photon : photonData)
     {
-      if (photon.exitTime == 0.0)
-        continue;
+      // if (photon.exitTime == 0.0)
+      //   continue;
       nOPs++;
       mP_trackid.push_back(photon.trackID);
       mP_pos_produced_x.push_back(photon.productionPosition.x());
@@ -404,6 +404,8 @@ void CaloTree::EndEvent()
       mP_pol_x.push_back(photon.polarization.x());
       mP_pol_y.push_back(photon.polarization.y());
       mP_pol_z.push_back(photon.polarization.z());
+
+      // std::cout << "Propagation length in z " << photon.exitPosition.z() - photon.productionPosition.z() << " speed " << (photon.exitTime - photon.productionTime) / (photon.exitPosition.z() - photon.productionPosition.z()) << " costheta " << photon.productionMomentum.z() / photon.productionMomentum.mag() << std::endl;
     }
     mP_nOPs = nOPs;
 
