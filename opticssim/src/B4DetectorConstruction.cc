@@ -460,19 +460,19 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     G4LogicalVolume *fiberCoreSLog = new G4LogicalVolume(fiberS, core_S_Material, "fiberCoreS");
 
     new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreCLog, "fiberCoreCherePhys", fiberCLog, false, 0, fCheckOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreSLog, "fiberCoreScintPhys", fiberSLog, false, 0, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(0, 0, 0), fiberCoreSLog, "fiberCoreScintPhys", fiberSLog, false, 0, fCheckOverlaps);
 
     double R = clad_C_rMax * 2.0 + 0.01; // 10 micron gap between cenral and peripheral fibers
     double cx1 = R * cos(30.0 * deg);
     double cy1 = R * sin(30.0 * deg);
     new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), fiberCLog, "fiberCladC", holeLV, false, 0, fCheckOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(cx1, cy1, 0.0), fiberCLog, "fiberCladC", holeLV, false, 1, fCheckOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(-cx1, cy1, 0.0), fiberCLog, "fiberCladC", holeLV, false, 2, fCheckOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(0., -R, 0.), fiberCLog, "fiberCladC", holeLV, false, 3, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(cx1, cy1, 0.0), fiberCLog, "fiberCladC", holeLV, false, 1, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(-cx1, cy1, 0.0), fiberCLog, "fiberCladC", holeLV, false, 2, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(0., -R, 0.), fiberCLog, "fiberCladC", holeLV, false, 3, fCheckOverlaps);
 
-    new G4PVPlacement(0, G4ThreeVector(cx1, -cy1, 0.), fiberSLog, "fiberCladS", holeLV, false, 1, fCheckOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(0.0, R, 0.), fiberSLog, "fiberCladS", holeLV, false, 2, fCheckOverlaps);
-    new G4PVPlacement(0, G4ThreeVector(-cx1, -cy1, 0.), fiberSLog, "fiberCladS", holeLV, false, 3, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(cx1, -cy1, 0.), fiberSLog, "fiberCladS", holeLV, false, 1, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(0.0, R, 0.), fiberSLog, "fiberCladS", holeLV, false, 2, fCheckOverlaps);
+    // new G4PVPlacement(0, G4ThreeVector(-cx1, -cy1, 0.), fiberSLog, "fiberCladS", holeLV, false, 3, fCheckOverlaps);
 
     /*if(sd){
      fiberCoreCLog->SetSensitiveDetector(sd);

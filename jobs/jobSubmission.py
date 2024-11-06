@@ -8,7 +8,9 @@ submissiontext = """#!/bin/bash
 """
 
 singularity_cmd = "singularity run --cleanenv --bind /lustre:/lustre /lustre/work/yofeng/SimulationEnv/alma9forgeant4_sbox/"
-run_cmd = "BUILDDIR/exampleB4b -b BUILDDIR/paramBatch03_single.mac      -jobName JOBNAME -runNumber RUNNUM -runSeq RUNSEQ      -numberOfEvents NEVENTS  -eventsInNtupe NEVENTS -gun_particle PARTICLE -gun_energy_min ENERGY_MIN -gun_energy_max ENERGY_MAX     -sipmType 1"
+#run_cmd = "BUILDDIR/exampleB4b -b BUILDDIR/paramBatch03_single.mac      -jobName JOBNAME -runNumber RUNNUM -runSeq RUNSEQ      -numberOfEvents NEVENTS  -eventsInNtupe NEVENTS -gun_particle PARTICLE -gun_energy_min ENERGY_MIN -gun_energy_max ENERGY_MAX     -sipmType 1"
+run_cmd = "BUILDDIR/exampleB4b -b BUILDDIR/paramBatch03_single_photon.mac      -jobName JOBNAME -runNumber RUNNUM -runSeq RUNSEQ      -numberOfEvents NEVENTS  -eventsInNtupe NEVENTS -gun_particle PARTICLE -sipmType 1"
+run_cmd = "BUILDDIR/exampleB4b -b BUILDDIR/paramBatch03_single_ele.mac      -jobName JOBNAME -runNumber RUNNUM -runSeq RUNSEQ      -numberOfEvents NEVENTS  -eventsInNtupe NEVENTS -gun_particle PARTICLE -gun_energy_min ENERGY_MIN -gun_energy_max ENERGY_MAX -sipmType 1"
 
 import os
 
@@ -18,12 +20,12 @@ print("Current directory: ", current_dir)
 #
 # change from here
 #
-sim_build_dir = f"{current_dir}/../sim/build"
+sim_build_dir = f"{current_dir}/../opticssim/build"
 log_dir = f"{current_dir}/log"
-njobs = 50
-nevents_per_job = 20
+njobs = 100
+nevents_per_job = 50
 runnumber = 100
-particle = "e+"
+particle = "pi+"
 energy_min = 100
 energy_max = 101
 jobname_prefix = "dreamsim"
