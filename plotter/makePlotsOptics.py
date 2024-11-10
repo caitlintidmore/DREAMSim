@@ -4,17 +4,21 @@ import sys
 sys.path.append("./CMSPLOTS")
 from myFunction import DrawHistos
 
+doOP = True
+
 print("Starting")
 
 ROOT.gROOT.SetBatch(True)
-ROOT.ROOT.EnableImplicitMT(4)
+ROOT.ROOT.EnableImplicitMT(8)
 
 elefile = "inputs/optics/electrons.txt"
 pionfile = "inputs/optics/pions.txt"
 opfile = "inputs/optics/ops.txt"
 
 loops = [('ele', elefile), ('pion', pionfile)]
-loops = [('ele', elefile)]
+#loops = [('ele', elefile)]
+if doOP:
+    loops = [('op', opfile)]
 
 rdfs = OrderedDict()
 chains = OrderedDict()
@@ -40,11 +44,16 @@ for part, filename in loops:
 nEvts = OrderedDict()
 for part, _ in loops:
     nEvts[part] = rdfs[part].Count().GetValue()
+    nEvts[part] = float(nEvts[part])
     print(f"Number of events for {part}: ", nEvts[part])
+    
+    if doOP:
+        # for OPs, it is always 1 OP per event
+        # no need to normalize
+        nEvts[part] = 1.0
 
     rdfs[part] = rdfs[part].Define("OP_passEnd", "OP_pos_final_z > 49.0")
     rdfs[part] = rdfs[part].Define("eWeight", " OP_passEnd / " + str(nEvts[part]))
-    #rdfs[part] = rdfs[part].Define("eWeight", "OP_passEnd")
     rdfs[part] = rdfs[part].Define("eWeightTotal", "1.0 / " + str(nEvts[part]))
     rdfs[part] = rdfs[part].Define("OP_time_delta", "OP_time_final - OP_time_produced") # in ns
     rdfs[part] = rdfs[part].Define("OP_pos_delta_z", "OP_pos_final_z - OP_pos_produced_z")  # in cm
@@ -62,7 +71,9 @@ evtlist = []
 
 x_range = 0.045
 nx_bins = 100
-px_range = 1e-6
+px_range = 1e-8
+if doOP:
+    px_range = 1e-6
 t_range = 20
 
 for part, rdf in rdfs.items():
@@ -220,11 +231,19 @@ def makeArrowPlots(hprof2d_x, hprof2d_y, min_entries=1, min_value= 1e-10, scale 
 args['dology'] = False
 args['drawoptions'] = "colz"
 args['dologz'] = True
-args['zmax'] = 1e3
-args['zmin'] = 1e0
+args['zmax'] = 1e2
+args['zmin'] = 1e-4
+if doOP:
+    args['zmax'] = 1e3
+    args['zmin'] = 1.0
 args['doth2'] = True
 args['addOverflow'] = False
 args['addUnderflow'] = False
+
+scale = 1e7
+if doOP:
+    scale = 2e4
+    
 for part in rdfs.keys():
     DrawHistos([histos['OP_pos_produced_x_vs_y'][part]], [], -x_range, x_range,
                "x [cm]", -x_range, x_range, "y [cm]", f"OP_pos_produced_x_vs_y_{part}", **args)
@@ -246,13 +265,13 @@ for part in rdfs.keys():
     DrawHistos([histos['OP_time_per_meter_vs_sinTheta_produced'][part]], [], 0, 12, "Time [ns/m]", 1, 2.5, "1.0/sin(#theta)", f"OP_time_per_meter_vs_sinTheta_produced_{part}", **args)
     
     # profile plots
-    arrows = makeArrowPlots(histos['OP_profilePx_produced_x_vs_y'][part].GetValue(), histos['OP_profilePy_produced_x_vs_y'][part].GetValue(), scale=2e4)
+    arrows = makeArrowPlots(histos['OP_profilePx_produced_x_vs_y'][part].GetValue(), histos['OP_profilePy_produced_x_vs_y'][part].GetValue(), scale=scale)
     DrawHistos([histos['OP_pos_produced_x_vs_y'][part]], [], -x_range, x_range,"x [cm]", -x_range, x_range, "y [cm]", f"OP_produced_x_vs_y_{part}_withPXY", **args, extraToDraw = arrows)
     
-    arrows = makeArrowPlots(histos['OP_profilePx_final_x_vs_y'][part].GetValue(), histos['OP_profilePy_final_x_vs_y'][part].GetValue(), scale=2e4)
+    arrows = makeArrowPlots(histos['OP_profilePx_final_x_vs_y'][part].GetValue(), histos['OP_profilePy_final_x_vs_y'][part].GetValue(), scale=scale)
     DrawHistos([histos['OP_pos_final_x_vs_y'][part]], [], -x_range, x_range,"x [cm]", -x_range, x_range, "y [cm]", f"OP_final_x_vs_y_{part}_withPXY", **args, extraToDraw = arrows)
     
-    arrows = makeArrowPlots(histos['OP_profilePx_produced_x_vs_y_total'][part].GetValue(), histos['OP_profilePy_produced_x_vs_y_total'][part].GetValue(), scale=2e4)
+    arrows = makeArrowPlots(histos['OP_profilePx_produced_x_vs_y_total'][part].GetValue(), histos['OP_profilePy_produced_x_vs_y_total'][part].GetValue(), scale=scale)
     DrawHistos([histos['OP_pos_produced_x_vs_y_total'][part]], [], -x_range, x_range,"x [cm]", -x_range, x_range, "y [cm]", f"OP_produced_x_vs_y_total_{part}_withPXY", **args, extraToDraw = arrows)
     
     # event displays
