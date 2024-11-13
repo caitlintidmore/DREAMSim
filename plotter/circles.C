@@ -3,7 +3,7 @@
 #include "TAxis.h"
 #include "TMath.h"
 
-void onecircle() {
+void circles() {
     // Parameters
     int nPoints = 100;      // Number of points to approximate the circles
     double r1 = 0.39;          // Radius of the inner circle
@@ -18,7 +18,11 @@ void onecircle() {
 
 
     TCanvas *c1 = new TCanvas("c1", "CIRCLES!", 600, 600);
-    c1->DrawFrame(-2.5, -2.5, 2.5, 2.5, "CIRCLES!!");
+    c1->DrawFrame(-1.5, -1.5, 1.5, 1.5, "CIRCLES!!");
+
+    //Open a ROOT file to save the output
+    TFile *file = new TFile("circle.root", "RECREATE");
+
 
     //loop over each center and draw the concentric circles
     for (size_t i=0; i < centers.size(); ++i) {
@@ -54,8 +58,14 @@ void onecircle() {
     	// Draw circles
     	innerCircle->Draw("L same");  // "L" draws lines between points
     	outerCircle->Draw("L same"); // "same" overlays on the same canvas
+
+
+    	innerCircle->Write(Form("innerCircle_%zu", i));	
+    	outerCircle->Write(Form("outerCircle_%zu", i));	
 }
 
+c1->Write();
+file->Close();
 
 c1->Update();
 }
