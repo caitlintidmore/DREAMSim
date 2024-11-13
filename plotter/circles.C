@@ -34,15 +34,15 @@ void circles() {
 	    double xOuter[nPoints], yOuter[nPoints];
 
     		// Generate points for the inner circle
-    	for (int i = 0; i < nPoints; ++i) {
-        	double theta = 2 * TMath::Pi() * i / nPoints;
+    	for (int i = 0; i < (nPoints); ++i) {
+        	double theta = 2 * TMath::Pi() * i / (nPoints-1);
         	xInner[i] = centerX + r1 * TMath::Cos(theta);
         	yInner[i] = centerY + r1 * TMath::Sin(theta);
     	}
 
     		// Generate points for the outer circle
-    	for (int i = 0; i < nPoints; ++i) {
-        	double theta = 2 * TMath::Pi() * i / nPoints;
+    	for (int i = 0; i < (nPoints); ++i) {
+        	double theta = 2 * TMath::Pi() * i / (nPoints-1);
         	xOuter[i] = centerX + r2 * TMath::Cos(theta);
         	yOuter[i] = centerY + r2 * TMath::Sin(theta);
     	}
