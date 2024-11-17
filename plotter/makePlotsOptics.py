@@ -8,6 +8,8 @@ doOP = False
 
 print("Starting")
 
+ROOT.gSystem.Load("macros/functions_cc.so")
+
 ROOT.gROOT.SetBatch(True)
 ROOT.ROOT.EnableImplicitMT(8)
 
@@ -55,6 +57,8 @@ for part, _ in loops:
     rdfs[part] = rdfs[part].Define("OP_passEnd", "OP_pos_final_z > 49.0")
     rdfs[part] = rdfs[part].Define("eWeight", " OP_passEnd / " + str(nEvts[part]))
     rdfs[part] = rdfs[part].Define("eWeightTotal", "1.0 / " + str(nEvts[part]))
+    rdfs[part] = rdfs[part].Define("eWeight_long", " eWeight * (OP_pos_produced_z < 0.0)")
+    rdfs[part] = rdfs[part].Define("eWeightTotal_long", " eWeightTotal * (OP_pos_produced_z < 0.0)")
     rdfs[part] = rdfs[part].Define("OP_time_delta", "OP_time_final - OP_time_produced") # in ns
     rdfs[part] = rdfs[part].Define("OP_pos_delta_z", "OP_pos_final_z - OP_pos_produced_z")  # in cm
     rdfs[part] = rdfs[part].Define("OP_time_per_meter", "OP_time_delta / OP_pos_delta_z * 100.0") # in ns/m
@@ -72,6 +76,9 @@ for part, _ in loops:
     rdfs[part] = rdfs[part].Define("OP_pos_final_core", "OP_pos_final_r < 0.039")
     rdfs[part] = rdfs[part].Define("OP_pos_final_clad", "OP_pos_final_r > 0.039 && OP_pos_final_r < 0.040")
     rdfs[part] = rdfs[part].Define("OP_pos_final_out", "OP_pos_final_r > 0.040")
+    
+    # sinAlpha
+    rdfs[part] = rdfs[part].Define("OP_pos_produced_sinAlpha", "SinTheta(OP_pos_produced_x,OP_pos_produced_y,OP_pos_produced_z,OP_mom_produced_x,OP_mom_produced_y,OP_mom_produced_z)")
     
     for place in ["clad", "core", "out"]:
         rdfs[part] = rdfs[part].Define(f"eWeight_{place}", f"eWeight * OP_pos_produced_{place}")
@@ -139,8 +146,16 @@ for part, rdf in rdfs.items():
     histos["OP_cosTheta_vs_r_produced"][part] = rdf.Histo2D(("OP_cosTheta_vs_r_produced" + suffix, "OP_cosTheta_vs_r_produced",
                                                          100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_cosTheta_produced", "eWeight")
     
-    histos["OP_cosTheta_vs_r_produced_total"][part] = rdf.Histo2D(("OP_cosTheta_vs_r_total" + suffix, "OP_cosTheta_vs_r_produced_total",
-                                                            100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_cosTheta_produced", "eWeightTotal")
+    histos["OP_cosTheta_vs_r_produced_total"][part] = rdf.Histo2D(("OP_cosTheta_vs_r_total" + suffix, "OP_cosTheta_vs_r_produced_total", 100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_cosTheta_produced", "eWeightTotal")
+    
+    histos["OP_sinAlpha_vs_r_produced"][part] = rdf.Histo2D(("OP_sinAlpha_vs_r_produced" + suffix, "OP_sinAlpha_vs_r_produced",
+                                                         100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_pos_produced_sinAlpha", "eWeight")
+    
+    histos["OP_sinAlpha_vs_r_produced_total"][part] = rdf.Histo2D(("OP_sinAlpha_vs_r_total" + suffix, "OP_sinAlpha_vs_r_produced_total", 100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_pos_produced_sinAlpha", "eWeightTotal")
+    
+    histos["OP_sinAlpha_vs_r_produced_long"][part] = rdf.Histo2D(("OP_sinAlpha_vs_r_produced_long" + suffix, "OP_sinAlpha_vs_r_produced_long", 100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_pos_produced_sinAlpha", "eWeight_long")
+    
+    histos["OP_sinAlpha_vs_r_produced_long_total"][part] = rdf.Histo2D(("OP_sinAlpha_vs_r_produced_long_total" + suffix, "OP_sinAlpha_vs_r_produced_long_total", 100, 0, 0.04, 100, 0, 1), "OP_pos_produced_r", "OP_pos_produced_sinAlpha", "eWeightTotal_long")
     
     histos["OP_profilePx_produced_x_vs_y"][part] = rdf.Profile2D(("OP_profilePx_produced_x_vs_y" + suffix, "OP_profilePx_produced_x_vs_y",nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "OP_mom_produced_x", "eWeight")
     histos["OP_profilePy_produced_x_vs_y"][part] = rdf.Profile2D(("OP_profilePy_produced_x_vs_y" + suffix, "OP_profilePy_produced_x_vs_y",nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "OP_mom_produced_y", "eWeight")
@@ -299,6 +314,20 @@ for part in rdfs.keys():
     
     hratio_cosTheta_vs_r = GetRatio(histos, "OP_cosTheta_vs_r_produced", parts=[part])[0]
     DrawHistos([hratio_cosTheta_vs_r], [], 0, 0.04, "r [cm]", 0, 1, "cos(#theta)", f"OP_cosTheta_vs_r_produced_ratio_{part}", **{**args, 'zmax': 1.0, 'zmin': 0.0})
+    
+    DrawHistos([histos['OP_sinAlpha_vs_r_produced'][part]], [], 0, 0.04, "r [cm]", 0, 1, "sin(#alpha)", f"OP_sinAlpha_vs_r_produced_{part}", **args)
+    
+    DrawHistos([histos['OP_sinAlpha_vs_r_produced_total'][part]], [], 0, 0.04, "r [cm]", 0, 1, "sin(#alpha)", f"OP_sinAlpha_vs_r_produced_total_{part}", **args)
+    
+    hratio_sinAlpha_vs_r = GetRatio(histos, "OP_sinAlpha_vs_r_produced", parts=[part])[0]
+    DrawHistos([hratio_sinAlpha_vs_r], [], 0, 0.04, "r [cm]", 0, 1, "sin(#alpha)", f"OP_sinAlpha_vs_r_produced_ratio_{part}", **{**args, 'zmax': 1.0, 'zmin': 0.0})
+    
+    DrawHistos([histos['OP_sinAlpha_vs_r_produced_long'][part]], [], 0, 0.04, "r [cm]", 0, 1, "sin(#alpha)", f"OP_sinAlpha_vs_r_produced_long_{part}", **args)
+    
+    DrawHistos([histos['OP_sinAlpha_vs_r_produced_long_total'][part]], [], 0, 0.04, "r [cm]", 0, 1, "sin(#alpha)", f"OP_sinAlpha_vs_r_produced_long_total_{part}", **args)
+    
+    hratio_sinAlpha_vs_r_long = GetRatio(histos, "OP_sinAlpha_vs_r_produced_long", parts=[part])[0]
+    DrawHistos([hratio_sinAlpha_vs_r_long], [], 0, 0.04, "r [cm]", 0, 1, "sin(#alpha)", f"OP_sinAlpha_vs_r_produced_ratio_long_{part}", **{**args, 'zmax': 1.0, 'zmin': 0.0})
     
     # profile plots
     arrows = makeArrowPlots(histos['OP_profilePx_produced_x_vs_y'][part].GetValue(), histos['OP_profilePy_produced_x_vs_y'][part].GetValue(), scale=scale)

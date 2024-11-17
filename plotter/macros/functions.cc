@@ -1,52 +1,75 @@
 #include "TMath.h"
 
-double CosTheta(double x0, double y0, double z0, double px, double py, double pz)
+#include "ROOT/RVec.hxx"
+using namespace ROOT::VecOps;
+
+RVec<double> CosTheta(const RVec<double> &x0, const RVec<double> &y0, const RVec<double> &z0, const RVec<double> &px, const RVec<double> &py, const RVec<double> &pz)
 {
+    RVec<double> result(x0.size());
+
     double c0 = 30.0 / 1.49; // cm / ns
-    double p = TMath::Sqrt(px * px + py * py + pz * pz);
-    px = px / p * c0;
-    py = py / p * c0;
-    pz = pz / p * c0;
-    p = TMath::Sqrt(px * px + py * py + pz * pz);
+    double r0 = 0.039;       // cm
 
-    double r0 = 0.039;
-    double a = px * px + py * py;
-    double b = 2 * (x0 * px + y0 * py);
-    double c = x0 * x0 + y0 * y0 - r0 * r0;
-
-    if (b * b - 4 * a * c < 0)
+    for (size_t i = 0; i < x0.size(); ++i)
     {
-        return -2.0;
+        double p = TMath::Sqrt(px[i] * px[i] + py[i] * py[i] + pz[i] * pz[i]);
+        double px_norm = px[i] / p * c0;
+        double py_norm = py[i] / p * c0;
+        double pz_norm = pz[i] / p * c0;
+        p = TMath::Sqrt(px_norm * px_norm + py_norm * py_norm + pz_norm * pz_norm);
+
+        double a = px_norm * px_norm + py_norm * py_norm;
+        double b = 2 * (x0[i] * px_norm + y0[i] * py_norm);
+        double c = x0[i] * x0[i] + y0[i] * y0[i] - r0 * r0;
+
+        if (b * b - 4 * a * c < 0)
+        {
+            result[i] = -2.0;
+            continue;
+        }
+
+        double t1 = (-b + TMath::Sqrt(b * b - 4 * a * c)) / (2 * a); // ns
+        double t2 = (-b - TMath::Sqrt(b * b - 4 * a * c)) / (2 * a); // ns
+
+        double tmin = TMath::Min(t1, t2);
+        double tmax = TMath::Max(t1, t2);
+        double t = tmin;
+        if (tmin < 0)
+        {
+            t = tmax;
+        }
+        if (t < 0)
+        {
+            result[i] = -1.0;
+            continue;
+        }
+
+        double x1 = x0[i] + t * px_norm;
+        double y1 = y0[i] + t * py_norm;
+        double z1 = z0[i] + t * pz_norm;
+
+        result[i] = (px_norm * x1 + py_norm * y1) / (p * r0);
     }
 
-    double t1 = (-b + TMath::Sqrt(b * b - 4 * a * c)) / (2 * a); // ns
-    double t2 = (-b - TMath::Sqrt(b * b - 4 * a * c)) / (2 * a); // ns
-
-    double tmin = TMath::Min(t1, t2);
-    double tmax = TMath::Max(t1, t2);
-    double t = tmin;
-    if (tmin < 0)
-    {
-        t = tmax;
-    }
-    if (t < 0)
-    {
-        return -1.0;
-    }
-
-    double x1 = x0 + t * px;
-    double y1 = y0 + t * py;
-    double z1 = z0 + t * pz;
-
-    return (px * x1 + py * y1) / (p * r0);
+    return result;
 }
 
-double SinTheta(double x0, double y0, double z0, double px, double py, double pz)
+RVec<double> SinTheta(const RVec<double> &x0, const RVec<double> &y0, const RVec<double> &z0, const RVec<double> &px, const RVec<double> &py, const RVec<double> &pz)
 {
-    double costheta = CosTheta(x0, y0, z0, px, py, pz);
-    if (costheta < 0)
+    RVec<double> costheta = CosTheta(x0, y0, z0, px, py, pz);
+    RVec<double> result(costheta.size());
+
+    for (size_t i = 0; i < costheta.size(); ++i)
     {
-        return costheta;
+        if (costheta[i] < 0)
+        {
+            result[i] = costheta[i];
+        }
+        else
+        {
+            result[i] = TMath::Sqrt(1 - costheta[i] * costheta[i]);
+        }
     }
-    return TMath::Sqrt(1 - costheta * costheta);
+
+    return result;
 }
