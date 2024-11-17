@@ -90,3 +90,13 @@ cd plotter
 python makePlotsRDF.py
 ```
 under the singularity environment.
+
+To run `makePlotsOptics.py` for the optics study, compile the helper functions in `plotter/macros` first with
+```
+cd plotter/macros
+root -b -q -e ".L functions.cc+"
+```
+Then run the script
+```
+python makePlotsOptics.py
+```
