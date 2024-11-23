@@ -66,10 +66,10 @@ for part, _ in loops:
     rdfs[part] = rdfs[part].Define("OP_cosTheta_produced", "OP_mom_produced_z / OP_mom_produced")
     rdfs[part] = rdfs[part].Define("OP_cosThetaInv_produced", "1.0 / OP_cosTheta_produced")
     rdfs[part] = rdfs[part].Define("OP_time_per_meter_cosTheta_produced", "OP_time_per_meter * OP_cosTheta_produced")
-    
-    # cladding or core
     rdfs[part] = rdfs[part].Define("OP_pos_produced_r", "sqrt(OP_pos_produced_x*OP_pos_produced_x + OP_pos_produced_y*OP_pos_produced_y)")
     rdfs[part] = rdfs[part].Define("OP_pos_final_r", "sqrt(OP_pos_final_x*OP_pos_final_x + OP_pos_final_y*OP_pos_final_y)")
+    
+    # cladding and core
     rdfs[part] = rdfs[part].Define("OP_pos_produced_core", "OP_pos_produced_r < 0.039")
     rdfs[part] = rdfs[part].Define("OP_pos_produced_clad", "OP_pos_produced_r > 0.039 && OP_pos_produced_r < 0.040")
     rdfs[part] = rdfs[part].Define("OP_pos_produced_out", "OP_pos_produced_r > 0.040")
@@ -78,6 +78,8 @@ for part, _ in loops:
     rdfs[part] = rdfs[part].Define("OP_pos_final_out", "OP_pos_final_r > 0.040")
     
     # sinAlpha
+    # the angle between the momentum and the radial vector
+    # incident angle at the core-cladding interface
     rdfs[part] = rdfs[part].Define("OP_pos_produced_sinAlpha", "SinTheta(OP_pos_produced_x,OP_pos_produced_y,OP_pos_produced_z,OP_mom_produced_x,OP_mom_produced_y,OP_mom_produced_z)")
     
     for place in ["clad", "core", "out"]:
@@ -126,6 +128,10 @@ for part, rdf in rdfs.items():
         ("OP_cosTheta_produced_core_total" + suffix, "OP_cosTheta_produced_core_total", 100, 0, 1), "OP_cosTheta_produced", "eWeightTotal_core")
     histos["OP_time_per_meter_cosTheta_produced"][part] = rdf.Histo1D(
         ("OP_time_per_meter_cosTheta_produced" + suffix, "OP_time_per_meter_cosTheta_produced", 100, 4.5, 6.5), "OP_time_per_meter_cosTheta_produced", "eWeight")
+    histos["OP_pos_produced_r"][part]  = rdf.Histo1D(
+        ("OP_pos_produced_r" + suffix, "OP_pos_produced_r", 100, 0, 0.04), "OP_pos_produced_r", "eWeight")
+    histos["OP_pos_produced_r_total"][part]  = rdf.Histo1D(
+        ("OP_pos_produced_r_total" + suffix, "OP_pos_produced_r_total", 100, 0, 0.04), "OP_pos_produced_r", "eWeightTotal")
 
     histos["OP_pos_produced_x_vs_y"][part] = rdf.Histo2D(
         ("OP_pos_produced_x_vs_y" + suffix, "OP_pos_produced_x_vs_y", nx_bins, -x_range, x_range, nx_bins, -x_range, x_range), "OP_pos_produced_x", "OP_pos_produced_y", "eWeight")
@@ -203,23 +209,25 @@ args = {
 print("Drawing")
 
 DrawHistos(list(histos['nOPs'].values()), list(histos['nOPs'].keys(
-)), 0, 10000, "Number of OPs", 1e-1, 1e4, "Fraction of events", "nOPs", **args)
+)), 0, 10000, "Number of OPs", 1e-1, 1e4, "Fraction of OPs", "nOPs", **args)
 DrawHistos(list(histos['OP_time_produced'].values()), list(histos['OP_time_produced'].keys(
-)), 0, t_range, "Time [ns]", 1e-1, 1e7, "Fraction of events", "OP_time_produced", **args)
+)), 0, t_range, "Time [ns]", 1e-1, 1e7, "Fraction of OPs", "OP_time_produced", **args)
 DrawHistos(list(histos['OP_time_final'].values()), list(histos['OP_time_final'].keys(
-)), 0, t_range, "Time [ns]", 1e-1, 1e7, "Fraction of events", "OP_time_final", **args)
+)), 0, t_range, "Time [ns]", 1e-1, 1e7, "Fraction of OPs", "OP_time_final", **args)
 DrawHistos(list(histos['OP_time_delta'].values()), list(histos['OP_time_delta'].keys(
-)), 0, t_range, "Time [ns]", 1e-1, 1e7, "Fraction of events", "OP_time_delta", **args)
+)), 0, t_range, "Time [ns]", 1e-1, 1e7, "Fraction of OPs", "OP_time_delta", **args)
 DrawHistos(list(histos['OP_pos_delta_z'].values()), list(histos['OP_pos_delta_z'].keys(
-)), 0, 100, "z [cm]", 1e-1, 1e7, "Fraction of events", "OP_pos_delta_z", **args)
+)), 0, 100, "z [cm]", 1e-1, 1e7, "Fraction of OPs", "OP_pos_delta_z", **args)
 DrawHistos(list(histos['OP_time_per_meter'].values()), list(histos['OP_time_per_meter'].keys(
-)), 0, 12, "Time [ns/m]", 1e-1, 1e7, "Fraction of events", "OP_time_per_meter", **args)
+)), 0, 12, "Time [ns/m]", 1e-1, 1e7, "Fraction of OPs", "OP_time_per_meter", **args)
 DrawHistos(list(histos['OP_cosTheta_produced'].values()), list(histos['OP_cosTheta_produced'].keys(
-)), 0, 1, "cos(#theta)", 1e-1, 1e7, "Fraction of events", "OP_cosTheta_produced", **args)
+)), 0, 1, "cos(#theta)", 1e-1, 1e7, "Fraction of OPs", "OP_cosTheta_produced", **args)
 DrawHistos(list(histos['OP_cosTheta_produced_total'].values()), list(histos['OP_cosTheta_produced_total'].keys(
-)), 0, 1, "cos(#theta)", 1e-1, 1e7, "Fraction of events", "OP_cosTheta_produced_total", **args)
+)), 0, 1, "cos(#theta)", 1e-1, 1e7, "Fraction of OPs", "OP_cosTheta_produced_total", **args)
 DrawHistos(list(histos['OP_time_per_meter_cosTheta_produced'].values()), list(histos['OP_time_per_meter_cosTheta_produced'].keys(
-)), 4.5, 6.5, "Time [ns/m]", 1e-1, 1e7, "Fraction of events", "OP_time_per_meter_cosTheta_produced", **args)
+)), 4.5, 6.5, "Time [ns/m]", 1e-1, 1e7, "Fraction of OPs", "OP_time_per_meter_cosTheta_produced", **args)
+DrawHistos(list(histos['OP_pos_produced_r'].values()), list(histos['OP_pos_produced_r'].keys(
+)), 0, 0.04, "r [cm]", 1e-1, 1e4, "Fraction of OPs", "OP_pos_produced_r", **args)
 
 def GetRatio(histos, hname, parts=None):
     if hname not in histos:
@@ -244,7 +252,11 @@ def GetRatio(histos, hname, parts=None):
 h_ratios_cosTheta = GetRatio(histos, "OP_cosTheta_produced")
 h_ratios_cosTheta_clad = GetRatio(histos, "OP_cosTheta_produced_clad")
 h_ratios_cosTheta_core = GetRatio(histos, "OP_cosTheta_produced_core")
-DrawHistos(h_ratios_cosTheta + h_ratios_cosTheta_clad + h_ratios_cosTheta_core, ["ele", "pion", "ele clad", "pion clad", "ele core", "ele clad"], 0, 1, "cos(#theta)", 1e-3, 10, "Fraction of events", "OP_cosTheta_produced_ratio", **{**args, 'mycolors': [2,3,4,5,6,7]})
+DrawHistos(h_ratios_cosTheta + h_ratios_cosTheta_clad + h_ratios_cosTheta_core, ["ele", "pion", "ele clad", "pion clad", "ele core", "ele clad"], 0, 1, "cos(#theta)", 1e-3, 10, "Fraction of OPs", "OP_cosTheta_produced_ratio", **{**args, 'mycolors': [2,3,4,5,6,7]})
+
+h_ratios_r = GetRatio(histos, "OP_pos_produced_r")
+DrawHistos(h_ratios_r, ["ele", "pion"], 0, 0.04, "r [cm]", 0.0, 0.4, "OP Trapping Rate", "OP_pos_produced_r_ratio", **{**args, 'dology': False})
+DrawHistos(h_ratios_r, ["ele", "pion"], 0, 0.04, "r [cm]", 1e-4, 1e2, "OP Trapping Rate", "OP_pos_produced_r_ratio_log", **args)
 
 def makeArrowPlots(hprof2d_x, hprof2d_y, min_entries=1, min_value= 1e-10, scale = 1e7):
     # assumes hprof2d_x and hprof2d_y have same binning
