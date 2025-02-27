@@ -47,6 +47,7 @@
 #include "CaloID.h"  // including CaloID, CaloHit, CaloTree
 #include "CaloHit.h" // including CaloID, CaloHit, CaloTree
 #include "CaloTree.h"
+#include "PhotonInfo.h"
 
 #include "TH1D.h"
 
@@ -82,6 +83,7 @@ B4bSteppingAction::~B4bSteppingAction()
 void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 {
   G4Track *track = step->GetTrack();
+  G4int trackID = track->GetTrackID();
 
   // Collect energy and track length step by step
 
@@ -95,8 +97,90 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 
   if (particleDef == opticalphoton)
   {
-    track->SetTrackStatus(fStopAndKill);
-    return;
+    double x = track->GetPosition().x() / cm;
+    double y = track->GetPosition().y() / cm;
+    if (!(x > -0.2 && x < 0.2 && y > -0.2 && y < 0.2))
+    {
+      // std::cout<<"Stepping Action:  optical photon outside the center"<<std::endl; 
+      track->SetTrackStatus(fStopAndKill);
+      return;
+    }
+
+    // propagate optical photons in this copper
+    G4StepPoint *preStepPoint = step->GetPreStepPoint();
+    G4StepPoint *postStepPoint = step->GetPostStepPoint();
+    // Check if the photon is just created
+    if (track->GetCurrentStepNumber() == 1)
+    {
+      G4ThreeVector productionPosition = preStepPoint->GetPosition();
+      G4double initialKineticEnergy = track->GetKineticEnergy();
+
+      // Add to photon data
+      PhotonInfo photon;
+      photon.trackID = trackID;
+      photon.productionPosition = productionPosition / cm;
+      photon.productionMomentum = track->GetMomentum() / GeV;
+      photon.productionTime = track->GetGlobalTime() / ns;
+      photon.polarization = track->GetPolarization();
+
+      auto *creatorProcess = track->GetCreatorProcess();
+      if (creatorProcess)
+      {
+        if (creatorProcess->GetProcessName() == "Cerenkov")
+        {
+          photon.isCerenkov = true;
+        }
+        else if (creatorProcess->GetProcessName() == "Scintillation")
+        {
+          photon.isScintillation = true;
+        }
+      }
+
+      auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
+      if (detname == "fiberCoreS")
+      {
+        photon.isCoreS = true;
+      }
+      else if (detname == "fiberCoreC")
+      {
+        photon.isCoreC = true;
+      }
+      else if (detname == "fiberCladS")
+      {
+        photon.isCladS = true;
+      }
+      else if (detname == "fiberCladC")
+      {
+        photon.isCladC = true;
+      }
+
+      photon.productionFiber = track->GetTouchable()->GetVolume()->GetCopyNo();
+
+      // Save initial data, exit info will be filled later
+      hh->photonData.push_back(photon);
+    }
+
+    // Check if the photon is leaving the detector to the world
+    if (postStepPoint->GetTouchableHandle()->GetVolume() && postStepPoint->GetTouchableHandle()->GetVolume()->GetName() == "World")
+    {
+      // std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
+      G4ThreeVector exitPosition = postStepPoint->GetPosition();
+      G4ThreeVector exitMomentum = track->GetMomentum();
+
+      // Find the photon in the container and update its exit information
+      for (auto &photon : hh->photonData)
+      {
+        if (photon.trackID == trackID)
+        {
+          // std::cout << "Photon " << trackID << " found in container. Updating exit info. Left x " << exitPosition.x() << " y " << exitPosition.y() << " z " << exitPosition.z() << std::endl;
+          photon.exitPosition = exitPosition / cm;
+          photon.exitMomentum = exitMomentum / GeV;
+          photon.exitTime = track->GetGlobalTime() / ns;
+          photon.exitFiber = preStepPoint->GetTouchable()->GetVolume()->GetCopyNo();
+          break;
+        }
+      }
+    }
   }
   //   === end of checking optical photon ===
 
@@ -154,7 +238,8 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   }
 
   // check energy conservation
-  double e_net_change = findInvisible(step, 0);
+  //double e_net_change = findInvisible(step, 0);
+  double e_net_change = 0;
   hh->accumulateEnergy(e_net_change / GeV, -90);
 
   if (thisName.compare(0, 5, "World") == 0)
