@@ -160,6 +160,21 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
       hh->photonData.push_back(photon);
     }
 
+    std::cout << "post step z " << postStepPoint->GetPosition().z() / cm << " x " << postStepPoint->GetPosition().x()/cm << " y " << postStepPoint->GetPosition().y() / cm << " steps " << track->GetCurrentStepNumber() << " volume " << postStepPoint->GetTouchableHandle()->GetVolume()->GetName() << " copy number " << postStepPoint->GetTouchableHandle()->GetVolume()->GetCopyNo() << " status " << track->GetTrackStatus() << " production proc " << track->GetCreatorProcess()->GetProcessName() << std::endl;
+    if (step->GetPreStepPoint()->GetProcessDefinedStep())
+    {
+      std::cout << "Process name: (prestep) " << step->GetPreStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+    if (step->GetPostStepPoint()->GetProcessDefinedStep())
+    {
+      std::cout << "Process name: (poststep) " << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+
+    if (postStepPoint->GetPosition().z() / cm > 95.0) {
+      std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
+      std::cout << " Volume name " << postStepPoint->GetTouchableHandle()->GetVolume()->GetName() << std::endl;
+    }
+
     // Check if the photon is leaving the detector to the world
     if (postStepPoint->GetTouchableHandle()->GetVolume() && postStepPoint->GetTouchableHandle()->GetVolume()->GetName() == "World")
     {

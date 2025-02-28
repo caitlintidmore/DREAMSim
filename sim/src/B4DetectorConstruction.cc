@@ -115,13 +115,10 @@ void B4DetectorConstruction::DefineMaterials()
     h_scintillator->AddMaterial(mat_C, 0.91512109);
     h_scintillator->AddMaterial(mat_H, 0.084878906);
 
-    std::cout << "B4DetectorConstruction::DefineMaterials()... start3..." << std::endl;
     // Liquid argon material
     G4double a; // mass of a mole;
     G4double z; // z=mean number of protons;
     G4double density;
-    new G4Material("liquidArgon", z = 18., a = 39.95 * g / mole, density = 1.390 * g / cm3);
-    // The argon by NIST Manager is a gas with a different density
 
     std::cout << "B4DetectorConstruction::DefineMaterials()... start4..." << std::endl;
     // Vacuum
@@ -347,6 +344,7 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     fluorinatedPolymer->AddElement(F, 2);
     G4MaterialPropertiesTable *mpPMMA;
     G4MaterialPropertiesTable *mpFS;
+    G4MaterialPropertiesTable *mpPS;
 
     //--- Generate and add material properties table ---
     G4double PhotonEnergy[] = {2.00 * eV, 2.03 * eV, 2.06 * eV, 2.09 * eV, 2.12 * eV,
@@ -372,7 +370,13 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
             1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49, 1.49};
     mpPMMA = new G4MaterialPropertiesTable();
     mpPMMA->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_PMMA, nEntries);
+
+    G4double Absorption_PMMA[nEntries];
+    std::fill_n(Absorption_PMMA, nEntries, 5.0 * m);
+    mpPMMA->AddProperty("ABSLENGTH", PhotonEnergy, Absorption_PMMA, nEntries);
+
     pmma->SetMaterialPropertiesTable(mpPMMA);
+    pmma_clad->SetMaterialPropertiesTable(mpPMMA);
 
     //--- Fluorinated Polymer (FS) ---
     G4double RefractiveIndex_FluorinatedPolymer[nEntries] =
@@ -384,7 +388,28 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
             1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42};
     mpFS = new G4MaterialPropertiesTable();
     mpFS->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_FluorinatedPolymer, nEntries);
+
+    G4double Absorption_FluorinatedPolymer[nEntries];
+    std::fill_n(Absorption_FluorinatedPolymer, nEntries, 10.0 * m);
+    mpFS->AddProperty("ABSLENGTH", PhotonEnergy, Absorption_FluorinatedPolymer, nEntries);
+
     fluorinatedPolymer->SetMaterialPropertiesTable(mpFS);
+
+    // -- Polystyrene --
+    G4double RefractiveIndex_Polystyrene[nEntries] =
+        {
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59,
+            1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59, 1.59};
+    mpPS = new G4MaterialPropertiesTable();
+    mpPS->AddProperty("RINDEX", PhotonEnergy, RefractiveIndex_Polystyrene, nEntries);
+    G4double Absorption_Polystyrene[nEntries];
+    std::fill_n(Absorption_Polystyrene, nEntries, 3.0 * m);
+    mpPS->AddProperty("ABSLENGTH", PhotonEnergy, Absorption_Polystyrene, nEntries);
+
+    polystyrene->SetMaterialPropertiesTable(mpPS);
 
     //---Materials for Cerenkov fiber---
     G4Material *clad_C_Material = fluorinatedPolymer;
@@ -429,7 +454,7 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     auto fiberS = new G4Tubs("fiberS", 0, core_S_rMax, fiberLength / 2., 0 * deg, 360. * deg);
 
     auto fiberCLog = new G4LogicalVolume(fiber, clad_C_Material, "fiberCladC");
-    auto fiberSLog = new G4LogicalVolume(fiber, clad_C_Material, "fiberCladS");
+    auto fiberSLog = new G4LogicalVolume(fiber, clad_S_Material, "fiberCladS");
 
     G4LogicalVolume *fiberCoreCLog = new G4LogicalVolume(fiberC, core_C_Material, "fiberCoreC");
     G4LogicalVolume *fiberCoreSLog = new G4LogicalVolume(fiberS, core_S_Material, "fiberCoreS");
@@ -468,16 +493,18 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     //
     // worldLV->SetVisAttributes (G4VisAttributes::GetInvisible());
 
-    worldLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0)));  // blue
-    calorLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0)));  // red
-    layerLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 1.0, 0.0))); // green
-    rodLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 0.0, 0.0)));   // blue
+    worldLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0, 0.5)));  // blue
+    calorLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0, 0.1)));  // red
+    layerLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 1.0, 0.0, 0.6))); // green
+    rodLV->SetVisAttributes(new G4VisAttributes(FALSE, G4Colour(0.0, 0.0, 0.0, 0.6)));   // blue
     // holeLV->SetVisAttributes(new G4VisAttributes(FALSE,G4Colour(1.0,1.0,1.0))); // black
-    holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 1.0, 0.0)));    // black
-    fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.0, 1.0))); // blue
-    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 0.0, 0.0))); // red
+    holeLV->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(1.0, 1.0, 1.0, 0.5))); // white
+    fiberCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.8, 0.5, 0.8, 0.9)));
+    fiberCoreCLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.98, 0.5, 0.98, 0.9)));
+    fiberSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.5, 0.8, 0.9)));       // red
+    fiberCoreSLog->SetVisAttributes(new G4VisAttributes(TRUE, G4Colour(0.0, 0.98, 0.98, 0.9))); // red
 
-    std::cout << "B4DetectorConstruction::DefineVolumes()...  endss..." << std::endl;
+    std::cout << "B4DetectorConstruction::DefineVolumes()...  ends..." << std::endl;
     //
     // Always return the physical World
     //
