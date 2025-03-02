@@ -97,105 +97,53 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
 
   if (particleDef == opticalphoton)
   {
+
+    bool isInFiberCore = false;
+    bool isInFiberClad = false;
+    auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
+    if (detname == "fiberCoreS" || detname == "fiberCoreC")
+    {
+      isInFiberCore = true;
+    }
+    if (detname == "fiberCladS" || detname == "fiberCladC")
+    {
+      isInFiberClad = true;
+    }
+    bool isOutside = false;
+    if (step->GetPostStepPoint()->GetTouchableHandle()->GetVolume())
+    {
+      if (step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName() == "World" || step->GetPostStepPoint()->GetTouchableHandle()->GetVolume()->GetName() == "Calorimeter")
+      {
+        isOutside = true;
+      }
+    }
+
+    int fiberIdx = 1;
+    if (isInFiberClad)
+    {
+      // Core is in "Clad"
+      // if already in clad, then the first volume is the clad, aka fiber id
+      fiberIdx = 0;
+    }
+
+    int fiberNumber = step->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber(fiberIdx);
+    int holeNumber = step->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber(fiberIdx + 1);
+    int rodNumber = step->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber(fiberIdx + 2);
+    int layerNumber = step->GetPreStepPoint()->GetTouchableHandle()->GetCopyNumber(fiberIdx + 3);
+
     double x = track->GetPosition().x() / cm;
     double y = track->GetPosition().y() / cm;
-    if (!(x > -0.2 && x < 0.2 && y > -0.2 && y < 0.2))
+    // if (!(x > -0.0 && x < 0.4 && y > -0.0 && y < 0.4))
+    if ((!(isInFiberCore || isInFiberClad) || rodNumber != 45 || layerNumber != 40) && !isOutside)
     {
-      // std::cout<<"Stepping Action:  optical photon outside the center"<<std::endl; 
+      // std::cout<<"Stepping Action:  optical photon outside the center"<<std::endl;
       track->SetTrackStatus(fStopAndKill);
       return;
     }
 
-    // propagate optical photons in this copper
-    G4StepPoint *preStepPoint = step->GetPreStepPoint();
-    G4StepPoint *postStepPoint = step->GetPostStepPoint();
-    // Check if the photon is just created
-    if (track->GetCurrentStepNumber() == 1)
-    {
-      G4ThreeVector productionPosition = preStepPoint->GetPosition();
-      G4double initialKineticEnergy = track->GetKineticEnergy();
+    // std::cout << "photon x " << x << "  y " << y << "  z " << track->GetPosition().z() / cm << " fiber Number " << fiberNumber << "  hole Number " << holeNumber << "  rod Number " << rodNumber << "  layer Number " << layerNumber << " isOutside " << isOutside << " isInFiberCore " << isInFiberCore << " isInFiberClad " << isInFiberClad << std::endl;
 
-      // Add to photon data
-      PhotonInfo photon;
-      photon.trackID = trackID;
-      photon.productionPosition = productionPosition / cm;
-      photon.productionMomentum = track->GetMomentum() / GeV;
-      photon.productionTime = track->GetGlobalTime() / ns;
-      photon.polarization = track->GetPolarization();
-
-      auto *creatorProcess = track->GetCreatorProcess();
-      if (creatorProcess)
-      {
-        if (creatorProcess->GetProcessName() == "Cerenkov")
-        {
-          photon.isCerenkov = true;
-        }
-        else if (creatorProcess->GetProcessName() == "Scintillation")
-        {
-          photon.isScintillation = true;
-        }
-      }
-
-      auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
-      if (detname == "fiberCoreS")
-      {
-        photon.isCoreS = true;
-      }
-      else if (detname == "fiberCoreC")
-      {
-        photon.isCoreC = true;
-      }
-      else if (detname == "fiberCladS")
-      {
-        photon.isCladS = true;
-      }
-      else if (detname == "fiberCladC")
-      {
-        photon.isCladC = true;
-      }
-
-      photon.productionFiber = track->GetTouchable()->GetVolume()->GetCopyNo();
-
-      // Save initial data, exit info will be filled later
-      hh->photonData.push_back(photon);
-    }
-
-    std::cout << "post step z " << postStepPoint->GetPosition().z() / cm << " x " << postStepPoint->GetPosition().x()/cm << " y " << postStepPoint->GetPosition().y() / cm << " steps " << track->GetCurrentStepNumber() << " volume " << postStepPoint->GetTouchableHandle()->GetVolume()->GetName() << " copy number " << postStepPoint->GetTouchableHandle()->GetVolume()->GetCopyNo() << " status " << track->GetTrackStatus() << " production proc " << track->GetCreatorProcess()->GetProcessName() << std::endl;
-    if (step->GetPreStepPoint()->GetProcessDefinedStep())
-    {
-      std::cout << "Process name: (prestep) " << step->GetPreStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
-    }
-    if (step->GetPostStepPoint()->GetProcessDefinedStep())
-    {
-      std::cout << "Process name: (poststep) " << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
-    }
-
-    if (postStepPoint->GetPosition().z() / cm > 95.0) {
-      std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
-      std::cout << " Volume name " << postStepPoint->GetTouchableHandle()->GetVolume()->GetName() << std::endl;
-    }
-
-    // Check if the photon is leaving the detector to the world
-    if (postStepPoint->GetTouchableHandle()->GetVolume() && postStepPoint->GetTouchableHandle()->GetVolume()->GetName() == "World")
-    {
-      // std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
-      G4ThreeVector exitPosition = postStepPoint->GetPosition();
-      G4ThreeVector exitMomentum = track->GetMomentum();
-
-      // Find the photon in the container and update its exit information
-      for (auto &photon : hh->photonData)
-      {
-        if (photon.trackID == trackID)
-        {
-          // std::cout << "Photon " << trackID << " found in container. Updating exit info. Left x " << exitPosition.x() << " y " << exitPosition.y() << " z " << exitPosition.z() << std::endl;
-          photon.exitPosition = exitPosition / cm;
-          photon.exitMomentum = exitMomentum / GeV;
-          photon.exitTime = track->GetGlobalTime() / ns;
-          photon.exitFiber = preStepPoint->GetTouchable()->GetVolume()->GetCopyNo();
-          break;
-        }
-      }
-    }
+    fillOPInfo(step, false);
   }
   //   === end of checking optical photon ===
 
@@ -253,7 +201,7 @@ void B4bSteppingAction::UserSteppingAction(const G4Step *step)
   }
 
   // check energy conservation
-  //double e_net_change = findInvisible(step, 0);
+  // double e_net_change = findInvisible(step, 0);
   double e_net_change = 0;
   hh->accumulateEnergy(e_net_change / GeV, -90);
 
@@ -854,4 +802,111 @@ double B4bSteppingAction::findInvisible(const G4Step *step, bool verbose)
     std::cout << std::endl;
   }
   return e_net_change;
+}
+
+void B4bSteppingAction::fillOPInfo(const G4Step *step, bool verbose)
+{
+  const G4Track *track = step->GetTrack();
+  const G4int trackID = track->GetTrackID();
+
+  // propagate optical photons in this copper
+  G4StepPoint *preStepPoint = step->GetPreStepPoint();
+  G4StepPoint *postStepPoint = step->GetPostStepPoint();
+
+  // Check if the photon is just created
+  if (track->GetCurrentStepNumber() == 1)
+  {
+    G4ThreeVector productionPosition = preStepPoint->GetPosition();
+    G4double initialKineticEnergy = track->GetKineticEnergy();
+
+    // Add to photon data
+    PhotonInfo photon;
+    photon.trackID = trackID;
+    photon.productionPosition = productionPosition / cm;
+    photon.productionMomentum = track->GetMomentum() / GeV;
+    photon.productionTime = track->GetGlobalTime() / ns;
+    photon.polarization = track->GetPolarization();
+
+    auto *creatorProcess = track->GetCreatorProcess();
+    if (creatorProcess)
+    {
+      if (creatorProcess->GetProcessName() == "Cerenkov")
+      {
+        photon.isCerenkov = true;
+      }
+      else if (creatorProcess->GetProcessName() == "Scintillation")
+      {
+        photon.isScintillation = true;
+      }
+    }
+
+    auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
+    if (detname == "fiberCoreS")
+    {
+      photon.isCoreS = true;
+    }
+    else if (detname == "fiberCoreC")
+    {
+      photon.isCoreC = true;
+    }
+    else if (detname == "fiberCladS")
+    {
+      photon.isCladS = true;
+    }
+    else if (detname == "fiberCladC")
+    {
+      photon.isCladC = true;
+    }
+
+    photon.productionFiber = track->GetTouchable()->GetVolume()->GetCopyNo();
+
+    // Save initial data, exit info will be filled later
+    hh->photonData.push_back(photon);
+  }
+
+  /*
+  if (track->GetCurrentStepNumber() >= 3) {
+
+    std::cout << "post step z " << postStepPoint->GetPosition().z() / cm << " x " << postStepPoint->GetPosition().x()/cm << " y " << postStepPoint->GetPosition().y() / cm << " steps " << track->GetCurrentStepNumber() << " volume " << postStepPoint->GetTouchableHandle()->GetVolume()->GetName() << " copy number " << postStepPoint->GetTouchableHandle()->GetVolume()->GetCopyNo() << " status " << track->GetTrackStatus() << " production proc " << track->GetCreatorProcess()->GetProcessName() << " track status " << track->GetTrackStatus() << std::endl;
+    if (step->GetPreStepPoint()->GetProcessDefinedStep())
+    {
+      std::cout << "Process name: (prestep) " << step->GetPreStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+    if (step->GetPostStepPoint()->GetProcessDefinedStep())
+    {
+      std::cout << "Process name: (poststep) " << step->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName() << std::endl;
+    }
+
+  }
+  */
+
+  // if (postStepPoint->GetPosition().z() / cm > 95.0)
+  //{
+  //   std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
+  //   std::cout << " Volume name " << postStepPoint->GetTouchableHandle()->GetVolume()->GetName() << std::endl;
+  // }
+
+  // Check if the photon is leaving the detector to the world
+  if (postStepPoint->GetTouchableHandle()->GetVolume() && postStepPoint->GetTouchableHandle()->GetVolume()->GetName() == "World")
+  {
+    // std::cout << "Photon " << trackID << " is leaving the detector. Position x " << postStepPoint->GetPosition().x() << " y " << postStepPoint->GetPosition().y() << " z " << postStepPoint->GetPosition().z() << std::endl;
+    G4ThreeVector exitPosition = postStepPoint->GetPosition();
+    G4ThreeVector exitMomentum = track->GetMomentum();
+
+    // Find the photon in the container and update its exit information
+    for (auto &photon : hh->photonData)
+    {
+      if (photon.trackID == trackID)
+      {
+        // std::cout << "Photon " << trackID << " found in container. Updating exit info. Left x " << exitPosition.x() << " y " << exitPosition.y() << " z " << exitPosition.z() << std::endl;
+        photon.exitPosition = exitPosition / cm;
+        photon.exitMomentum = exitMomentum / GeV;
+        photon.exitTime = track->GetGlobalTime() / ns;
+        photon.exitFiber = preStepPoint->GetTouchable()->GetVolume()->GetCopyNo();
+
+        std::cout << "touchable name " << preStepPoint->GetTouchable()->GetVolume()->GetName() << " copy number " << preStepPoint->GetTouchable()->GetVolume()->GetCopyNo() << " depth " << preStepPoint->GetTouchable()->GetHistory()->GetDepth() << " rod number " << preStepPoint->GetTouchable()->GetVolume(3)->GetCopyNo() << " layer number " << preStepPoint->GetTouchable()->GetVolume(4)->GetCopyNo() << " fiber number " << preStepPoint->GetTouchable()->GetVolume(1)->GetCopyNo() << " hole number " << preStepPoint->GetTouchable()->GetVolume(2)->GetCopyNo() << " x " << preStepPoint->GetPosition().x() / cm << " y " << preStepPoint->GetPosition().y() / cm << " z " << preStepPoint->GetPosition().z() / cm << std::endl;
+        break;
+      }
+    }
+  }
 }

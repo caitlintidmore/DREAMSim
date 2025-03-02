@@ -419,33 +419,33 @@ G4VPhysicalVolume *B4DetectorConstruction::DefineVolumes()
     G4Material *core_S_Material = polystyrene;
 
     // Parameters for fibers
-    double clad_C_rMin = 0.39 * mm;       // cladding cherenkov minimum radius
-    double clad_C_rMax = 0.40 * mm;       // cladding cherenkov max radius
-    double clad_C_Dz = fiberLength / 2.0; // cladding cherenkov lenght
+    double clad_C_rMin = 0.39 * mm; // cladding cherenkov minimum radius
+    double clad_C_rMax = 0.40 * mm; // cladding cherenkov max radius
+    // double clad_C_Dz = fiberLength / 2.0; // cladding cherenkov lenght
     // double clad_C_Sphi = 0.;              // cladding cherenkov min rotation
-    //  double clad_C_Dphi = 2. * M_PI;       // cladding chrenkov max rotation
+    // double clad_C_Dphi = 2. * M_PI;       // cladding chrenkov max rotation
 
     double core_C_rMin = 0. * mm;
     double core_C_rMax = 0.39 * mm;
-    double core_C_Dz = clad_C_Dz;
+    // double core_C_Dz = clad_C_Dz;
     // double core_C_Sphi = 0.;
-    //  double core_C_Dphi = 2. * M_PI;
+    // double core_C_Dphi = 2. * M_PI;
 
     double clad_S_rMin = 0.39 * mm;
     double clad_S_rMax = 0.40 * mm;
-    double clad_S_Dz = clad_C_Dz;
+    // double clad_S_Dz = clad_C_Dz;
     // double clad_S_Sphi = 0.;
     // double clad_S_Dphi = 2. * M_PI;
 
     double core_S_rMin = 0. * mm;
     double core_S_rMax = 0.39 * mm;
-    double core_S_Dz = clad_C_Dz;
+    // double core_S_Dz = clad_C_Dz;
     // double core_S_Sphi = 0.;
-    //  double core_S_Dphi = 2. * M_PI;
+    // double core_S_Dphi = 2. * M_PI;
 
-    double theta_unit = 0;
-    double deltatheta = 0;
-    double thetaofcenter = 0;
+    // double theta_unit = 0;
+    // double deltatheta = 0;
+    // double thetaofcenter = 0;
 
     // creating fibers solids
     // G4cout << "r_clad= " << clad_C_rMax << " r_coreC=" << core_C_rMax << " r_coreS=" << core_S_rMax << G4endl;
