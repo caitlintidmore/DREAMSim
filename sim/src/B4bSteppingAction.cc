@@ -773,7 +773,7 @@ void B4bSteppingAction::fillOPInfo(const G4Step *step, bool verbose)
   bool isCladS = false;
   bool isCladC = false;
   auto detname = track->GetTouchable()->GetVolume()->GetLogicalVolume()->GetName();
-  if (detname == "fiberCoreS" || detname == "fiberCoreC")
+  if (detname == "fiberCoreS")
   {
     isCoreS = true;
   }
