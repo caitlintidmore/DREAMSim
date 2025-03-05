@@ -14,15 +14,16 @@ ROOT.ROOT.EnableImplicitMT(4)
 
 elefile = "inputs/electrons.txt"
 pionfile = "inputs/pions.txt"
-#neufile = "inputs/neutrons.txt"
+# neufile = "inputs/neutrons.txt"
 
 chains = OrderedDict()
 chains['ele'] = ROOT.TChain("tree")
 chains['pion'] = ROOT.TChain("tree")
-#chains['neu'] = ROOT.TChain("tree")
+# chains['neu'] = ROOT.TChain("tree")
 
-#loops = [('ele', elefile), ('pion', pionfile), ('neu', neufile)]
+# loops = [('ele', elefile), ('pion', pionfile), ('neu', neufile)]
 loops = [('ele', elefile), ('pion', pionfile)]
+# loops = [('pion', pionfile)]
 
 rdfs = OrderedDict()
 
@@ -42,32 +43,33 @@ for part, filename in loops:
             if nfiles > 100:
                 break
     rdfs[part] = ROOT.RDataFrame(chains[part])
-    
+
 rdfs_new = OrderedDict()
 for part in rdfs.keys():
-    rdfs_new[part] = rdfs[part].Define( "eTotaltruth", "eLeaktruth + eCalotruth + eWorldtruth + eInvisible") \
+    rdfs_new[part] = rdfs[part].Define("eTotaltruth", "eLeaktruth + eCalotruth + eWorldtruth + eInvisible") \
         .Define("eTotalGeant", "eLeaktruth + eCalotruth + eWorldtruth") \
-        .Define("truthhit_r", f"sqrt((truthhit_x-2.5)*(truthhit_x-2.5) + (truthhit_y+2.5)*(truthhit_y+2.5))") 
-        
+        .Define("truthhit_r", f"sqrt((truthhit_x-2.5)*(truthhit_x-2.5) + (truthhit_y+2.5)*(truthhit_y+2.5))")
+
     # optics features
     rdfs_new[part] = rdfs_new[part].Define("OP_passEnd", "OP_pos_final_z > 99.0") \
         .Define("OP_passEnd_isCoreC", "OP_passEnd && OP_isCoreC") \
         .Define("OP_passEnd_isCoreS", "OP_passEnd && OP_isCoreS")
-        
-            
+
+
 rdfs = rdfs_new
 
 nEvts = OrderedDict()
 nEvts['ele'] = rdfs['ele'].Count().GetValue()
 nEvts['pion'] = rdfs['pion'].Count().GetValue()
-#nEvts['neu'] = rdfs['neu'].Count().GetValue()
+# nEvts['neu'] = rdfs['neu'].Count().GetValue()
 print("Number of events for electrons: ", nEvts['ele'])
 print("Number of events for pions: ", nEvts['pion'])
-#print("Number of events for neutrons: ", nEvts['neu'])
+# print("Number of events for neutrons: ", nEvts['neu'])
 
 rdfs['ele'] = rdfs['ele'].Define("eweight", f"truthhit_edep/ {nEvts['ele']}")
-rdfs['pion'] = rdfs['pion'].Define("eweight", f"truthhit_edep/ {nEvts['pion']}")
-#rdfs['neu'] = rdfs['neu'].Define("eweight", f"truthhit_edep/ {nEvts['neu']}")
+rdfs['pion'] = rdfs['pion'].Define(
+    "eweight", f"truthhit_edep/ {nEvts['pion']}")
+# rdfs['neu'] = rdfs['neu'].Define("eweight", f"truthhit_edep/ {nEvts['neu']}")
 
 histos = OrderedDict()
 figures = ['eLeaktruth', 'eCalotruth', 'eTotaltruth', 'eTotalGeant',
@@ -90,7 +92,7 @@ for fig in figures:
 
 for part, rdf in rdfs.items():
     suffix = "_" + part
-    
+
     histos['eLeaktruth'][part] = rdf.Histo1D(
         ("eLeaktruth" + suffix, "eLeaktruth", 50, 0, 20.0), "eLeaktruth")
     histos['eCalotruth'][part] = rdf.Histo1D(
@@ -127,7 +129,7 @@ for part, rdf in rdfs.items():
         ("truthhit_x_vs_truthhit_z" + suffix, "truthhit_x_vs_truthhit_z", 50, -20, 20, 100, -100, 100), "truthhit_x", "truthhit_z", "eweight")
     histos['truthhit_r_vs_truthhit_z'][part] = rdf.Histo2D(
         ("truthhit_r_vs_truthhit_z" + suffix, "truthhit_r_vs_truthhit_z", 50, 0, 30, 100, -100, 100), "truthhit_r", "truthhit_z", "eweight")
-    
+
     histos['truthhit_r_vs_truthhit_z'][part] = rdf.Histo2D(
         ("truthhit_r_vs_truthhit_z" + suffix, "truthhit_r_vs_truthhit_z", 50, 0, 30, 100, -100, 100), "truthhit_r", "truthhit_z", "eweight")
 
@@ -150,19 +152,19 @@ for part, rdf in rdfs.items():
             (f"event_{i}_time_vs_truthhit_z" + suffix, f"event_{i}_time_vs_truthhit_z", 50, 0, 20, 100, -100, 100), "truthhit_globaltime", "truthhit_z", "truthhit_edep")
         histos[f"event_{i}_time_vs_truthhit_r"][part] = rdf_event.Histo2D(
             (f"event_{i}_time_vs_truthhit_r" + suffix, f"event_{i}_time_vs_truthhit_r", 50, 0, 20, 50, 0, 30), "truthhit_globaltime", "truthhit_r", "truthhit_edep")
-        
+
     for fib in ["isCoreC", "isCoreS"]:
-        
+
         suffix = "_" + part + "_" + fib
         oppart = part + "_" + fib
-        
+
         histos['OP_time_produced'][oppart] = rdf.Histo1D(
-            ("OP_time_produced" + suffix, "OP_time_produced", 50, 0, 50), "OP_time_produced", f"OP_passEnd_{fib}")
+            ("OP_time_produced" + suffix, "OP_time_produced", 50, 0, 5), "OP_time_produced", f"OP_passEnd_{fib}")
         histos['OP_time_final'][oppart] = rdf.Histo1D(
-            ("OP_time_final" + suffix, "OP_time_final", 50, 0, 50), "OP_time_final", f"OP_passEnd_{fib}")
+            ("OP_time_final" + suffix, "OP_time_final", 50, 5, 17), "OP_time_final", f"OP_passEnd_{fib}")
         histos["OP_time_final_vs_OP_pos_produced_z"][oppart] = rdf.Histo2D(
-            ("OP_time_final_vs_OP_pos_produced_z" + suffix, "OP_time_final_vs_OP_pos_produced_z", 50, 0, 12, 100, -100, 100), "OP_time_final", "OP_pos_produced_z", f"OP_passEnd_{fib}")
-        
+            ("OP_time_final_vs_OP_pos_produced_z" + suffix, "OP_time_final_vs_OP_pos_produced_z", 50, 5, 17, 100, -100, 100), "OP_time_final", "OP_pos_produced_z", f"OP_passEnd_{fib}")
+
 
 colormaps = {
     'ele_isCoreS': 2,
@@ -223,9 +225,9 @@ DrawHistos(list(histos['time'].values()), list(histos['time'].keys(
 DrawHistos(list(histos['time_zoomed'].values()), list(histos['time_zoomed'].keys(
 )), 0, 10, "Time [ns]", 1e-3, 1e2, "Deposited Energy [GeV]", "time_zoomed", **args)
 DrawHistos(list(histos['OP_time_produced'].values()), list(histos['OP_time_produced'].keys(
-)), 0, 50, "Time [ns]", 1e-3, 1e2, "Deposited Energy [GeV]", "OP_time_produced", **args)
+)), 0, 5, "Time [ns]", 1e1, 1e8, "Deposited Energy [GeV]", "OP_time_produced", **args)
 DrawHistos(list(histos['OP_time_final'].values()), list(histos['OP_time_final'].keys(
-)), 0, 50, "Time [ns]", 1e-3, 1e2, "Deposited Energy [GeV]", "OP_time_final", **args)
+)), 5, 17, "Time [ns]", 1e1, 1e8, "Deposited Energy [GeV]", "OP_time_final", **args)
 
 
 # 2D plots
@@ -249,7 +251,7 @@ for part in rdfs.keys():
                "Time [ns]", -100, 100, "z [cm]", f"time_vs_truthhit_z_{part}", **args)
     DrawHistos([histos['time_vs_truthhit_r'][part]], [], 0, 20,
                "Time [ns]", 0, 30, "r [cm]", f"time_vs_truthhit_r_{part}", **args)
-    
+
     # event displays
     for i in evtlist:
         DrawHistos([histos[f"event_{i}_truthhit_x_vs_truthhit_y"][part]], [
@@ -263,9 +265,11 @@ for part in rdfs.keys():
         ], 0, 20, "Time [ns]", -100, 100, "z [cm]", f"event_{i}_time_vs_truthhit_z_{part}", **args)
         DrawHistos([histos[f"event_{i}_time_vs_truthhit_r"][part]], [
         ], 0, 20, "Time [ns]", 0, 30, "r [cm]", f"event_{i}_time_vs_truthhit_r_{part}", **args)
-        
+
+args['zmax'] = 1e8
+args['zmin'] = 1e1
 for oppart in histos["OP_time_produced"].keys():
-    DrawHistos([histos["OP_time_final_vs_OP_pos_produced_z"][oppart]], [], 0, 12,
+    DrawHistos([histos["OP_time_final_vs_OP_pos_produced_z"][oppart]], [], 5, 17,
                "Time [ns]", -100, 100, "z [cm]", f"OP_time_final_vs_OP_pos_produced_z_{oppart}", **args)
 
 
