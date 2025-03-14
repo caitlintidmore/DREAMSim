@@ -2,7 +2,6 @@ import sys
 from collections import OrderedDict
 import ROOT
 sys.path.append("./CMSPLOTS")
-
 from myFunction import DrawHistos
 
 
@@ -163,7 +162,7 @@ for part, rdf in rdfs.items():
         histos['OP_time_final'][oppart] = rdf.Histo1D(
             ("OP_time_final" + suffix, "OP_time_final", 50, 5, 17), "OP_time_final", f"OP_passEnd_{fib}")
         histos["OP_time_final_vs_OP_pos_produced_z"][oppart] = rdf.Histo2D(
-            ("OP_time_final_vs_OP_pos_produced_z" + suffix, "OP_time_final_vs_OP_pos_produced_z", 50, 5, 17, 100, -100, 100), "OP_time_final", "OP_pos_produced_z", f"OP_passEnd_{fib}")
+            ("OP_time_final_vs_OP_pos_produced_z" + suffix, "OP_time_final_vs_OP_pos_produced_z", 50, 6, 17, 50, -100, 100), "OP_time_final", "OP_pos_produced_z", f"OP_passEnd_{fib}")
 
 
 colormaps = {
@@ -248,9 +247,9 @@ for part in rdfs.keys():
                "r [cm]", -100, 100, "z [cm]", f"truthhit_r_vs_truthhit_z_{part}", **args)
 
     DrawHistos([histos['time_vs_truthhit_z'][part]], [], 0, 20,
-               "Time [ns]", -100, 100, "z [cm]", f"time_vs_truthhit_z_{part}", **args)
+               "Arrivial time [ns]", -100, 100, "Production z [cm]", f"time_vs_truthhit_z_{part}", **args)
     DrawHistos([histos['time_vs_truthhit_r'][part]], [], 0, 20,
-               "Time [ns]", 0, 30, "r [cm]", f"time_vs_truthhit_r_{part}", **args)
+               "Arrivial time [ns]", 0, 30, "Production r [cm]", f"time_vs_truthhit_r_{part}", **args)
 
     # event displays
     for i in evtlist:
@@ -266,11 +265,11 @@ for part in rdfs.keys():
         DrawHistos([histos[f"event_{i}_time_vs_truthhit_r"][part]], [
         ], 0, 20, "Time [ns]", 0, 30, "r [cm]", f"event_{i}_time_vs_truthhit_r_{part}", **args)
 
-args['zmax'] = 1e8
-args['zmin'] = 1e1
+args['zmax'] = 1e4
+args['zmin'] = 1e0
 for oppart in histos["OP_time_produced"].keys():
-    DrawHistos([histos["OP_time_final_vs_OP_pos_produced_z"][oppart]], [], 5, 17,
-               "Time [ns]", -100, 100, "z [cm]", f"OP_time_final_vs_OP_pos_produced_z_{oppart}", **args)
+    DrawHistos([histos["OP_time_final_vs_OP_pos_produced_z"][oppart]], [], 7, 14,
+               "Arrival time [ns]", -100, 100, "Production z [cm]", f"OP_time_final_vs_OP_pos_produced_z_{oppart}", **args)
 
 
 print("Done")
