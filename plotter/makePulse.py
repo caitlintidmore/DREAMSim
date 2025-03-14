@@ -12,10 +12,10 @@ h_pulse = pfile.Get("hist2")
 pulses = np.zeros(h_pulse.GetNbinsX())
 for i in range(h_pulse.GetNbinsX()):
     pulses[i] = h_pulse.GetBinContent(i+1)
-    
+
 print("pulses: ", pulses)
 
-sim_data = "/home/yongbinfeng/Desktop/CaloSim/DREAMSim/sim/build/mc_testjob_run001_003_Test_20evt_pi+_100.0_100.0.root"
+sim_data = "/Users/yfeng/Desktop/mc_testjob_run001_003_Test_20evt_pi+_100.0_100.0.root"
 ifile = ROOT.TFile(sim_data)
 tree = ifile.Get("tree")
 
@@ -27,27 +27,27 @@ nBins = int(time_max / time_per_bin)
 # pulses for truth photons and reco with shapes
 histos_truth = OrderedDict()
 histos_reco = OrderedDict()
-for i in range(nFibers):
-    histos_truth[i] = ROOT.TH1D(
-        f"h_truth_C_{i}", f"h_truth_C_{i}", nBins, 0, time_max)
-    histos_reco[i] = ROOT.TH1D(
-        f"h_reco_C_{i}", f"h_reco_C_{i}", nBins, 0, time_max)
-    
-    
+for ievt in range(20):
+    histos_truth[ievt] = OrderedDict()
+    histos_reco[ievt] = OrderedDict()
+    for i in range(nFibers):
+        histos_truth[ievt][i] = ROOT.TH1D(
+            f"h_truth_C_{ievt}Evt_{i}", f"h_truth_C_{ievt}Evt_{i}", nBins, 0, time_max)
+        histos_reco[ievt][i] = ROOT.TH1D(
+            f"h_reco_C_{ievt}Evt_{i}", f"h_reco_C_{ievt}Evt_{i}", nBins, 0, time_max)
+
+
 def AddPulse(h_pulse_reco, t0):
     t0_bin = h_pulse_reco.FindBin(t0)
     for i in range(pulses.size):
         val = h_pulse_reco.GetBinContent(t0_bin + i)
         val += pulses[i]
         h_pulse_reco.SetBinContent(t0_bin + i, val)
-    
+
 
 nevts = tree.GetEntries()
-for i in range(nevts):
-    tree.GetEntry(i)
-
-    if i != 5:
-        continue
+for ievt in range(nevts):
+    tree.GetEntry(ievt)
 
     nPhotons = tree.nOPs
     for j in range(nPhotons):
@@ -59,20 +59,22 @@ for i in range(nevts):
         if not tree.OP_isCoreC[j]:
             continue
 
-        if not tree.OP_productionFiber[j] == 0:
-            continue
-
         t = tree.OP_time_final[j]
+
+        ifiber = tree.OP_productionFiber[j]
+
+        if ifiber >= nFibers:
+            print("found possible bug, ifiber: ", ifiber)
+
         # truth photon arriving time
-        histos_truth[0].Fill(t, 1.0)
+        histos_truth[ievt][ifiber].Fill(t, 1.0)
         # reco-ed pulse shape
-        AddPulse(histos_reco[0], t)
-        
+        AddPulse(histos_reco[ievt][ifiber], t)
+
 # save to file
 ofile = ROOT.TFile("output.root", "RECREATE")
-for i in range(nFibers):
-    histos_truth[i].Write()
-    histos_reco[i].Write()
+for ievt in range(20):
+    for ifiber in range(nFibers):
+        histos_truth[ievt][ifiber].Write()
+        histos_reco[ievt][ifiber].Write()
 ofile.Close()
-        
-
