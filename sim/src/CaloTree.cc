@@ -201,6 +201,9 @@ CaloTree::CaloTree(string macFileName, int argc, char **argv)
   tree->Branch("truthhit_edepbirk", &m_edepbirktruth);
   tree->Branch("truthhit_ncer", &m_ncertruth);
   tree->Branch("truthhit_ncercap", &m_ncercaptruth);
+  tree->Branch("truthhit_layerNumber", &m_layerNumber);
+  tree->Branch("truthhit_rodNumber", &m_rodNumber);
+  tree->Branch("truthhit_fiberNumber", &m_fiberNumber);
 
   tree->Branch("eCalotruth", &m_eCalotruth);
   tree->Branch("eWorldtruth", &m_eWorldtruth);
@@ -479,6 +482,9 @@ void CaloTree::clearCaloTree()
   m_edepbirktruth.clear();
   m_ncertruth.clear();
   m_ncercaptruth.clear();
+  m_layerNumber.clear();
+  m_rodNumber.clear();
+  m_fiberNumber.clear();
 
   m_eCalotruth = 0.0;
   m_eWorldtruth = 0.0;
@@ -568,6 +574,9 @@ void CaloTree::accumulateHits(CaloHit ah)
     m_edepbirktruth.push_back(ah.edepbirk);
     m_ncertruth.push_back(ah.ncer);
     m_ncercaptruth.push_back(ah.ncercap);
+    m_layerNumber.push_back(ah.layerNumber);
+    m_rodNumber.push_back(ah.rodNumber);
+    m_fiberNumber.push_back(ah.fiberNumber);
   }
 
   CaloID id = ah.caloid;
