@@ -14,14 +14,14 @@ ROOT.ROOT.EnableImplicitMT(4)
 
 elefile = "inputs/electrons.txt"
 pionfile = "inputs/pions.txt"
-neufile = "inputs/neutrons.txt"
+#neufile = "inputs/neutrons.txt"
 
 chains = OrderedDict()
 chains['ele'] = ROOT.TChain("tree")
 chains['pion'] = ROOT.TChain("tree")
-chains['neu'] = ROOT.TChain("tree")
+#chains['neu'] = ROOT.TChain("tree")
 
-loops = [('ele', elefile), ('pion', pionfile), ('neu', neufile)]
+loops = [('ele', elefile), ('pion', pionfile)] #, ('neu', neufile)]
 
 rdfs = OrderedDict()
 
@@ -53,14 +53,14 @@ rdfs = rdfs_new
 nEvts = OrderedDict()
 nEvts['ele'] = rdfs['ele'].Count().GetValue()
 nEvts['pion'] = rdfs['pion'].Count().GetValue()
-nEvts['neu'] = rdfs['neu'].Count().GetValue()
+#nEvts['neu'] = rdfs['neu'].Count().GetValue()
 print("Number of events for electrons: ", nEvts['ele'])
 print("Number of events for pions: ", nEvts['pion'])
-print("Number of events for neutrons: ", nEvts['neu'])
+#print("Number of events for neutrons: ", nEvts['neu'])
 
 rdfs['ele'] = rdfs['ele'].Define("eweight", f"truthhit_edep/ {nEvts['ele']}")
 rdfs['pion'] = rdfs['pion'].Define("eweight", f"truthhit_edep/ {nEvts['pion']}")
-rdfs['neu'] = rdfs['neu'].Define("eweight", f"truthhit_edep/ {nEvts['neu']}")
+#rdfs['neu'] = rdfs['neu'].Define("eweight", f"truthhit_edep/ {nEvts['neu']}")
 
 histos = OrderedDict()
 figures = ['eLeaktruth', 'eCalotruth', 'eTotaltruth', 'eTotalGeant',
@@ -143,7 +143,7 @@ for part, rdf in rdfs.items():
 colormaps = {
     'ele': 2,
     'pion': 3,
-    'neu': 4
+    #'neu': 4
 }
 
 
