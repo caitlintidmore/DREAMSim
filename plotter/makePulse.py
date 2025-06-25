@@ -13,9 +13,27 @@ pulses = np.zeros(h_pulse.GetNbinsX())
 for i in range(h_pulse.GetNbinsX()):
     pulses[i] = h_pulse.GetBinContent(i+1)
 
-print("pulses: ", pulses)
+# print("pulses: ", pulses)
 
-sim_data = "/Users/yfeng/Desktop/mc_testjob_run001_003_Test_20evt_pi+_100.0_100.0.root"
+# Convert to full-length NumPy array
+full_pulses = np.array([h_pulse.GetBinContent(i+1) for i in range(h_pulse.GetNbinsX())])
+
+# Optional: plot to inspect
+#import matplotlib.pyplot as plt
+#plt.plot(full_pulses)
+#plt.title("Full Pulse")
+#plt.show()
+
+# # Trim to a reasonable window around the peak
+# # You can adjust this range as needed
+# start = 200
+# end = 300  # this gives you 100 bins = 4 ns (with 0.04 ns/bin)
+# pulses = full_pulses[start:end]
+
+# print(f"Trimmed pulse length: {pulses.size} bins")
+
+
+sim_data = "/home/catidmor/DREAMSim/sim/build/mc_mu0_run001_003_Test_50evt_mu+_100.0_100.0.root"
 ifile = ROOT.TFile(sim_data)
 tree = ifile.Get("tree")
 
@@ -27,7 +45,9 @@ nBins = int(time_max / time_per_bin)
 # pulses for truth photons and reco with shapes
 histos_truth = OrderedDict()
 histos_reco = OrderedDict()
-for ievt in range(20):
+
+nevts = tree.GetEntries()
+for ievt in range(nevts):
     histos_truth[ievt] = OrderedDict()
     histos_reco[ievt] = OrderedDict()
     for i in range(nFibers):
@@ -43,6 +63,24 @@ def AddPulse(h_pulse_reco, t0):
         val = h_pulse_reco.GetBinContent(t0_bin + i)
         val += pulses[i]
         h_pulse_reco.SetBinContent(t0_bin + i, val)
+
+# def AddPulse(h_pulse_reco, t0):
+#     t0_bin_center = h_pulse_reco.FindBin(t0)
+#     bin_center_time = h_pulse_reco.GetBinCenter(t0_bin_center)
+#     center = pulses.size // 2
+
+#     shift_in_bins = int(round((t0 - bin_center_time) / time_per_bin))
+#     t0_bin = t0_bin_center + shift_in_bins
+
+#     for i in range(pulses.size):
+#         bin_idx = t0_bin + i - center
+#         if 1 <= bin_idx <= h_pulse_reco.GetNbinsX():
+#             val = h_pulse_reco.GetBinContent(bin_idx)
+#             val += pulses[i]
+#             h_pulse_reco.SetBinContent(bin_idx, val)
+
+#     print(f"  t0 = {t0:.2f}, t0_bin = {t0_bin}, pulse center = {center}")
+
 
 
 nevts = tree.GetEntries()
@@ -72,7 +110,7 @@ for ievt in range(nevts):
         AddPulse(histos_reco[ievt][ifiber], t)
 
 # save to file
-ofile = ROOT.TFile("output.root", "RECREATE")
+ofile = ROOT.TFile("yboutput.root", "RECREATE")
 for ievt in range(20):
     for ifiber in range(nFibers):
         histos_truth[ievt][ifiber].Write()

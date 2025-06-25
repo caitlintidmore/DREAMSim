@@ -11,53 +11,65 @@ ROOT.gROOT.SetBatch(True)
 
 ROOT.ROOT.EnableImplicitMT(4)
 
-# elefile = "inputs/electrons.txt"
-pionfile = "inputs/pions.txt"
+#elefile = "inputs/electrons.txt"
+#pionfile = "inputs/pions.txt"
 # neufile = "inputs/neutrons.txt"
+mufile = "inputs/muons.txt"
 
 chains = OrderedDict()
-# chains['ele'] = ROOT.TChain("tree")
-chains['pion'] = ROOT.TChain("tree")
+#chains['ele'] = ROOT.TChain("tree")
+#chains['pion'] = ROOT.TChain("tree")
 # chains['neu'] = ROOT.TChain("tree")
+chains['muon'] = ROOT.TChain("tree")       
 
 # loops = [('ele', elefile), ('pion', pionfile), ('neu', neufile)]
-# loops = [('ele', elefile), ('pion', pionfile)]
-loops = [('pion', pionfile)]
+#loops = [('ele', elefile), ('pion', pionfile)]
+#loops = [('pion', pionfile)]
+loops = [('muon', mufile)]
 
 rdfs = OrderedDict()
 
+#quick side note:
+#part is ele, pion, muon, neu
+#filename is elefile, pionfile, mufile, neufile
+#this is also the part that reads the files for the MC root files
+
 for part, filename in loops:
-    nfiles = 0
+    nfiles = 0                                  #starting a counter at 0 and adding 1 for each file read below
     with open(filename) as f:
         print(f"Reading {filename}")
         elefiles = f.readlines()
         for line in elefiles:
-            line = line.strip()
-            if line.startswith("#"):
+            line = line.strip()                 #remove whitespace
+            if line.startswith("#"):            #skip comments
                 continue
-            nfiles += 1
+            nfiles += 1                         #shorthand for nfiles = nfiles + 1
             print(f"{part} " + line)
-            chains[part].Add(line)
+            chains[part].Add(line)              #chains is an ordered dic prev defined
 
             if nfiles > 100:
                 break
     rdfs[part] = ROOT.RDataFrame(chains[part])
 
 nEvts = OrderedDict()
-# nEvts['ele'] = rdfs['ele'].Count().GetValue()
-nEvts['pion'] = rdfs['pion'].Count().GetValue()
+#nEvts['ele'] = rdfs['ele'].Count().GetValue()
+#nEvts['pion'] = rdfs['pion'].Count().GetValue()
 # nEvts['neu'] = rdfs['neu'].Count().GetValue()
-# print("Number of events for electrons: ", nEvts['ele'])
-print("Number of events for pions: ", nEvts['pion'])
+nEvts['muon'] = rdfs['muon'].Count().GetValue()
+#print("Number of events for electrons: ", nEvts['ele'])
+#print("Number of events for pions: ", nEvts['pion'])
 # print("Number of events for neutrons: ", nEvts['neu'])
+print("Number of events for muons: ", nEvts['muon'])
 
-# rdfs['ele'] = rdfs['ele'].Define("eventweight", f"1.0 / {nEvts['ele']}")
-rdfs['pion'] = rdfs['pion'].Define("eventweight", f"1.0 / {nEvts['pion']}")
+#rdfs['ele'] = rdfs['ele'].Define("eventweight", f"1.0 / {nEvts['ele']}")
+#rdfs['pion'] = rdfs['pion'].Define("eventweight", f"1.0 / {nEvts['pion']}")
+rdfs['muon'] = rdfs['muon'].Define("eventweight", f"1.0 / {nEvts['muon']}")
 
-# rdfs['ele'] = rdfs['ele'].Define("eweight", f"truthhit_edep/ {nEvts['ele']}")
-rdfs['pion'] = rdfs['pion'].Define(
-    "eweight", f"truthhit_edep/ {nEvts['pion']}")
+#rdfs['ele'] = rdfs['ele'].Define("eweight", f"truthhit_edep/ {nEvts['ele']}")
+#rdfs['pion'] = rdfs['pion'].Define(
+    #"eweight", f"truthhit_edep/ {nEvts['pion']}")
 # rdfs['neu'] = rdfs['neu'].Define("eweight", f"truthhit_edep/ {nEvts['neu']}")
+rdfs['muon'] = rdfs['muon'].Define("eweight", f"truthhit_edep/ {nEvts['muon']}")
 
 
 rdfs_new = OrderedDict()
@@ -86,6 +98,12 @@ for part in rdfs.keys():
         
     # energy deposit in the "center of the calorimeter"
     rdfs_new[part] = rdfs_new[part].Define("eDep_center", "Sum(truthhit_edep * (truthhit_layerNumber == 40 && truthhit_rodNumber == 45))")
+
+    #difference in time between produced and final OPs
+    rdfs_new[part] = rdfs_new[part].Define("OP_time_diff", "OP_time_final - OP_time_produced") \
+        .Define("OP_time_diff_isCoreC", "OP_time_diff * OP_passEnd_isCoreC_normalized") \
+        .Define("OP_time_diff_isCoreS", "OP_time_diff * OP_passEnd_isCoreS_normalized") \
+        .Define("OP_time_diff_vs_OP_pos_produced_z", "OP_time_diff * OP_passEnd_normalized / (OP_pos_produced_z + 100.)") #let vscode make this one willy nilly
             
 rdfs = rdfs_new
 
@@ -98,7 +116,8 @@ figures = ['eLeaktruth', 'eCalotruth', 'eTotaltruth', 'eTotalGeant',
            'time_vs_truthhit_z', 'time_vs_truthhit_r',
            "OP_time_produced", "OP_time_final", "OP_time_final_vs_OP_pos_produced_z",
            "eDep_center", "eDep_center_vs_nOPs_produced", "eDep_center_vs_nOPs_passEnd",
-           "nOPs_produced", "nOPs_passEnd", "capEff"]
+           "nOPs_produced", "nOPs_passEnd", "capEff", "OP_time_diff", "OP_time_diff_isCoreC", 
+           "OP_time_diff_isCoreS", "OP_time_diff_vs_OP_pos_produced_z"]
 
 
 evtlist = [1, 3, 5, 10, 15]
@@ -172,7 +191,8 @@ for part, rdf in rdfs.items():
         ("time_vs_truthhit_z" + suffix, "time_vs_truthhit_z", 50, 0, 20, 100, -100, 100), "truthhit_globaltime", "truthhit_z", "eweight")
     histos['time_vs_truthhit_r'][part] = rdf.Histo2D(
         ("time_vs_truthhit_r" + suffix, "time_vs_truthhit_r", 50, 0, 20, 50, 0, 30), "truthhit_globaltime", "truthhit_r", "eweight")
-
+    
+    
     # some event displays
     for i in evtlist:
         rdf_event = rdf.Filter(f"rdfentry_ == {i}")
@@ -199,14 +219,18 @@ for part, rdf in rdfs.items():
             ("OP_time_final" + suffix, "OP_time_final", 50, 5, 17), "OP_time_final", f"OP_passEnd_{fib}_normalized")
         histos["OP_time_final_vs_OP_pos_produced_z"][oppart] = rdf.Histo2D(
             ("OP_time_final_vs_OP_pos_produced_z" + suffix, "OP_time_final_vs_OP_pos_produced_z", 50, 6, 17, 50, -100, 100), "OP_time_final", "OP_pos_produced_z", f"OP_passEnd_{fib}_normalized")
+        histos["OP_time_diff"][oppart] = rdf.Histo1D(
+        ("OP_time_diff" + suffix, "OP_time_diff", 50, 0, 20), "OP_time_diff", f"OP_passEnd_{fib}_normalized")
 
 
 colormaps = {
-    'ele_isCoreS': 2,
-    'ele_isCoreC': 6,
-    'pion_isCoreS': 3,
-    'pion_isCoreC': 4,
-    'neu': 4
+    'muon_isCoreS': 2,
+    'muon_isCoreC': 6,
+    #'ele_isCoreS': 2,
+    #'ele_isCoreC': 6,
+    #'pion_isCoreS': 3,
+    #'pion_isCoreC': 4,
+    #'neu': 4
 }
 
 
