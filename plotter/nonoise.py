@@ -24,10 +24,12 @@ rodsize = .4
 xsize = 3 * rodsize
 ysize = 4 * rodsize
 
+#real data
 p_data = "data_pulses.root"
 pfile = ROOT.TFile(p_data)
 # pulse shape file per photon (?)
 h_pulse = pfile.Get("pulse_evt957") 
+
 
 #attempting to make it with an actual pulse shape
 pulses = np.zeros(nBins)
@@ -53,7 +55,6 @@ def AddPulseFromArray(hist, pulse_array, t0):
             hist.SetBinContent(bin_idx, val + pulse_array[i])
     
 
-nevts = tree.GetEntries()
 for ievt in range(nevts):
     tree.GetEntry(ievt)
 
