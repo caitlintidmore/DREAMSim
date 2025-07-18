@@ -9,85 +9,118 @@ import os
 import re
 
 # Create output directory
-os.makedirs("deconv", exist_ok=True)
+os.makedirs("byhandsdeconv", exist_ok=True)
 
 # Parameters
 time_start = 0
-time_max = 32.0
-time_per_bin = 0.03125
+time_max = 30.0
+time_per_bin = (30.0/1024)  # 0.029296875 ps
 nBins = int(time_max / time_per_bin)
 
-# Load and process pulse
-g = ROOT.TFile("data_pulses.root")
-pulse = g.Get("pulse_evt957")
-pulse_array = np.array([pulse.GetBinContent(i + 1) for i in range(pulse.GetNbinsX())])
 
-# if pulse.GetNbinsX() != nBins:
-#     x_old = np.linspace(0, time_max, pulse.GetNbinsX())
-#     x_new = np.linspace(0, time_max, nBins)
-#     interp = interp1d(x_old, pulse_array, kind="cubic", fill_value=0, bounds_error=False)
-#     pulse_array = interp(x_new)
-
-# pulse_array = np.clip(pulse_array, 1e-6, None)  # Avoid zeros
-# pulse_array /= np.sum(pulse_array)
-# pulse_array = np.roll(pulse_array, int(nBins / 2) - int(np.argmax(pulse_array)))
 
 # Load data
-f = ROOT.TFile("output.root")
+f = ROOT.TFile("drsoutput.root")
 
-def richardson_lucy(observed, psf, iterations=2, clip=True):
-    psf = psf / np.sum(psf)
-    psf_mirror = psf[::-1]
-    estimate = np.full_like(observed, 0.5)
-    for _ in range(iterations):
-        conv = fftconvolve(estimate, psf, mode='same')
-        conv = np.maximum(conv, 1e-8)
-        ratio = observed / conv
-        estimate *= fftconvolve(ratio, psf_mirror, mode='same')
-        if clip:
-            estimate = np.clip(estimate, 0, 1e6)
-    return estimate
 
 
 # Process each reconstructed signal
 for key in f.GetListOfKeys():
     name = key.GetName()
-    if not name.startswith("h_reco"):
+    if not name.startswith("waveform"):
         continue
-    match = re.match(r"h_reco_evt(\d+)_x(\d+)_y(\d+)", name)
+    match = re.match(r"waveform_(\d+)", name)
     if not match:
         continue
-    ievt, x, y = map(int, match.groups())
+    
     hist = f.Get(name)
-    signal = np.array([hist.GetBinContent(i + 1) for i in range(nBins)])
+  
+    data = np.array([hist.GetBinContent(i + 1) for i in range(nBins)])
+    # smoothed = gaussian_filter1d(data, sigma=3)
 
-    time_axis = np.linspace(time_start + time_per_bin / 2, time_max - time_per_bin / 2, nBins)
+    #next two lines look at first 100 bins, estimate noise level, and 
+    #finds peaks 3x above noise, makes everything else 0
+    
+    # noise_level = np.std(smoothed[:100])
+    # threshold = np.where(smoothed > noise_level * 3, smoothed, 0)
 
-    smoothed = gaussian_filter1d(signal, sigma=2)
-    noise_level = np.std(smoothed[:100])
-    thresholded = np.where(smoothed > noise_level * 3, smoothed, 0)
+    noise_lvl = np.std(data[:100])
+    threshld = np.where(data > noise_lvl * 3, data, 0)
 
-    deconv = richardson_lucy(thresholded, pulse_array)
 
-    peaks, _ = find_peaks(deconv, height=10)
-    h_delta = ROOT.TH1F(f"h_delta_evt{ievt}_x{x}_y{y}", "Deconvolved Peaks", nBins, time_start, time_max)
+    #peak finding for raw and smoothed data
+    peaks, _ = find_peaks(threshld)              #_ = dummy variable for peak properties (i.e height,width,etc)
+    # smoothed_peaks, _ = find_peaks(threshold)
+
+    #deltas for regular data
+    h_delta = ROOT.TH1F(f"h_delta_evt{name}", "Deconvolved Peaks", nBins, time_start, time_max)
     for p in peaks:
-        h_delta.SetBinContent(int(p + 1), float(deconv[p]))
-    delta = np.array([h_delta.GetBinContent(i + 1) for i in range(nBins)])
+        h_delta.SetBinContent(int(p + 1), float(threshld[p]))
+    delta = np.array([h_delta.GetBinContent(i + 1) for i in range(nBins)])  
+
+
+    for i, val in enumerate(delta):
+        if val != 0:
+            print(f"Name: {name}, Bin: {i}, Value: {val}")
+
+
+    # #deltas for smoothed data
+    # h_delta_smoothed = ROOT.TH1F(f"h_delta_smoothed_evt{name}", "Deconvolved Smoothed Peaks", nBins, time_start, time_max)
+    # for p in smoothed_peaks:
+    #     h_delta_smoothed.SetBinContent(int(p + 1), float(threshold[p]))
+    # delta_smoothed = np.array([h_delta_smoothed.GetBinContent(i + 1) for i in range(nBins)]) 
+
 
 
     plt.figure()
-    # plt.plot(time_axis, signal, label="Observed", alpha=0.5)
-    plt.plot(time_axis, pulse_array * np.max(signal), '--', label="Response (scaled)")
-    # plt.plot(time_axis, deconv, label="Deconvolved", linewidth=1)
-    # plt.plot(time_axis, delta, label="Reconstructed Truth Hits", color="red")
+    plt.plot(data, label="Observed Signal", alpha=0.5)
+    # plt.plot(smoothed, label="Smoothed Signal", linewidth=1)
+    # plt.plot(threshold, label="Smoothed Thresholded Signal", linewidth=1)
+    # plt.plot(threshld, label="Raw Thresholded Signal", linewidth=1)
+    plt.plot(delta, label="Photon Hits", color="red", linewidth=1)
+    # plt.plot(delta_smoothed, label="Deconvolved Smoothed Peaks", color="orange", linewidth=1)
     plt.xlabel("Time Slice")
-    plt.ylabel("Amplitude [arb.]")
-    plt.xlim(0, time_max/2)
-    # plt.ylim(0, 50)
-    plt.title(f"Evt {ievt} | x{x} y{y}")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(f"deconv/deconv_evt{ievt}_iX{x}_iY{y}.png")
+    plt.savefig(f"byhanddeconv/{key}.png")
     plt.close()
+
+
+
+
+    #print(f"{name}'s max: {np.max(smoothed)}, noise level: {noise_level}")
+
+    #if np.max(smoothed) < 3*noise_level:
+        #print(f"Skipping {name} due to low signal")
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # # time_axis = np.linspace(time_start + time_per_bin / 2, time_max - time_per_bin / 2, nBins)
+
+
+
+
+
+    # plt.figure()
+    # #plt.plot(time_axis, signal, label="Observed", alpha=0.5)
+    # plt.plot(time_axis, pulse_array * np.max(signal), '--', label="Response (scaled)")
+    # #plt.plot(time_axis, deconv, label="Deconvolved", linewidth=1)
+    # #plt.plot(time_axis, delta, label="Reconstructed Truth Hits", color="red")
+    # plt.xlabel("Time Slice")
+    # plt.ylabel("Amplitude [arb.]")
+    # plt.xlim(0, time_max/2)
+    # # plt.ylim(0, 50)
+    # plt.title(f"Evt {ievt}")
+    # plt.legend()
+    # plt.grid(True)
+    # plt.tight_layout()
+    # plt.savefig(f"deconv/deconv_evt{ievt}.png")
+    # plt.close()

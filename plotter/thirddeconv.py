@@ -28,14 +28,14 @@ pulse_array = np.array([pulse.GetBinContent(i + 1) for i in range(pulse.GetNbins
 #     interp = interp1d(x_old, pulse_array, kind="cubic", fill_value=0, bounds_error=False)
 #     pulse_array = interp(x_new)
 
-# pulse_array = np.clip(pulse_array, 1e-6, None)  # Avoid zeros
-# pulse_array /= np.sum(pulse_array)
-# pulse_array = np.roll(pulse_array, int(nBins / 2) - int(np.argmax(pulse_array)))
+pulse_array = np.clip(pulse_array, 1e-6, None)  # Avoid zeros
+pulse_array /= np.sum(pulse_array)
+pulse_array = np.roll(pulse_array, int(nBins / 2) - int(np.argmax(pulse_array)))
 
 # Load data
 f = ROOT.TFile("output.root")
 
-def richardson_lucy(observed, psf, iterations=2, clip=True):
+def richardson_lucy(observed, psf, iterations=1000, clip=True):
     psf = psf / np.sum(psf)
     psf_mirror = psf[::-1]
     estimate = np.full_like(observed, 0.5)
@@ -45,7 +45,7 @@ def richardson_lucy(observed, psf, iterations=2, clip=True):
         ratio = observed / conv
         estimate *= fftconvolve(ratio, psf_mirror, mode='same')
         if clip:
-            estimate = np.clip(estimate, 0, 1e6)
+            estimate = np.clip(estimate, 0, 1e8)
     return estimate
 
 # Load truth hits
@@ -60,6 +60,9 @@ for key in f.GetListOfKeys():
     ievt, x, y = map(int, match.groups())
     hist = f.Get(name)
     truth_dict[(ievt, x, y)] = np.array([hist.GetBinContent(i + 1) for i in range(nBins)])
+
+
+
 
 # Process each reconstructed signal
 for key in f.GetListOfKeys():
@@ -93,18 +96,21 @@ for key in f.GetListOfKeys():
     nonzero_indices = np.nonzero(truthhits)[0]
     if len(nonzero_indices) > 0:
         first_hit_time = time_axis[nonzero_indices[0]]
-        shift = ((time_max / 2) -2) - first_hit_time  
+        pulse_peak_idx = np.argmax(pulse_array)
+        pulse_peak_time = time_axis[pulse_peak_idx]
+        shift = pulse_peak_time - first_hit_time
     else:
         shift = 0.0
+
 
     shifted_time_axis = time_axis - shift 
  
     plt.figure()
-    # plt.plot(shifted_time_axis, signal, label="Observed", alpha=0.5)
+    plt.plot(shifted_time_axis, signal, label="Observed", alpha=0.5)
     plt.plot(shifted_time_axis, pulse_array * np.max(signal), '--', label="Response (scaled)")
-    # plt.plot(shifted_time_axis, deconv, label="Deconvolved", linewidth=1)
-    # plt.plot(shifted_time_axis, delta, label="Reconstructed Truth Hits", color="red")
-    # plt.plot(time_axis, truthhits * scalefactor, label="Truth Hits")
+    plt.plot(shifted_time_axis, deconv, label="Deconvolved", linewidth=1)
+    plt.plot(shifted_time_axis, delta, label="Reconstructed Truth Hits", color="red")
+    plt.plot(shifted_time_axis, truthhits * scalefactor, label="Truth Hits")
     plt.xlabel("Time Slice")
     plt.ylabel("Amplitude [arb.]")
     plt.xlim(0, time_max/2)

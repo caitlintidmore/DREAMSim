@@ -6,85 +6,56 @@ import os
 
 # Create output directory
 os.makedirs("drsdata", exist_ok=True)
+threshold = 200
 
 # Load ROOT file and tree
-f = ROOT.TFile.Open("run1033_250704164003.root")
+f = ROOT.TFile.Open("run1040_250705180247_converted.root")
 tree = f.Get("EventTree")
 
 # Define the branch name you want to access
-branch_name = "DRS_Board1_Group0_Channel0"
+branch_name = "DRS_Board1_Group0_Channel1"
 
 # Loop over all entries and store branch content as NumPy arrays
 arrays = []
 for i, event in enumerate(tree):
+
     data = getattr(event, branch_name)
-    np_data = np.array(data, dtype=np.float32)
-    arrays.append(np_data)
 
-    # Spike detection — compare max to median
-    baseline = np.median(np_data)
-    peak = np.max(np_data)
-    ratio = peak / baseline if baseline > 0 else 0
-
-    # Skip plotting if no significant spike (less than 25% above baseline)
-    if ratio < 1.25:
+    if max(data) < threshold:
         continue
 
-    # Optional: plot the first few with spikes
-    if i < 100:
-        plt.figure()
-        plt.plot(np_data, label=f"Entry {i} (ratio = {ratio:.2f})")
-        plt.xlabel("Channel index")
-        plt.ylabel("Energy")
-        plt.xlim(0, 1000)
-        plt.title(f"{branch_name} - Event {i}")
-        plt.legend()
-        plt.savefig(f"drsdata/evt{i}.png")
-        plt.close()
+    np_data = np.array(data, dtype=np.float32)
+    baseline = np.median(np_data)
 
+    base_data = np_data - baseline  # Subtract baseline
 
+    if max(base_data) < threshold:
+        continue
 
+    arrays.append(base_data)
 
+    # if len(arrays) >= 50:
+    #     break
 
+# for i, base_data in enumerate(arrays):    #enumerate give the index and the value at index
+#     peak = np.max(base_data)
+#     plt.figure()
+#     plt.plot(base_data, label=f"Entry {i} (peak = {peak:.2f})")
+#     plt.xlabel("Channel index")
+#     plt.ylabel("Energy")
+#     plt.xlim(0, 1000)
+#     plt.title(f"{branch_name} - Event {i}")
+#     plt.legend()
+#     plt.savefig(f"drsdata/evt{i}.png")
+#     plt.close()
 
+# save to file
+ofile = ROOT.TFile("drsoutput.root", "RECREATE")
 
+for i, base_data in enumerate(arrays):
+    hist = ROOT.TH1F(f"waveform_{i}", f"Filtered waveform {i}", len(base_data), 0, len(base_data))
+    for j, val in enumerate(base_data):
+        hist.SetBinContent(j + 1, val)
+    hist.Write()
 
-
-
-# #without spike filtering
-# import ROOT
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import os
-
-# # Create output directory
-# os.makedirs("drsdata", exist_ok=True)
-
-# # Load ROOT file and tree
-# f = ROOT.TFile.Open("run1033_250704164003.root")
-# tree = f.Get("EventTree")
-
-# # Define the branch name you want to access
-# branch_name = "DRS_Board1_Group0_Channel0"
-
-# # Loop over all entries and store branch content as NumPy arrays
-# arrays = []
-# for i, event in enumerate(tree):
-#     # Get the branch content (usually a C++ array or vector)
-#     data = getattr(event, branch_name)
-
-#     # Convert to NumPy array
-#     np_data = np.array(data, dtype=np.float32)  # Adjust dtype if needed
-#     arrays.append(np_data)
-
-#     # Optional: plot the first few entries
-#     if i < 100:
-#         plt.figure()
-#         plt.plot(np_data, label=f"Entry {i}")
-#         plt.xlabel("Channel index")
-#         plt.ylabel("Energy")
-#         plt.xlim(0, 1000)
-#         plt.title(f"{branch_name} - Event {i}")
-#         plt.legend()
-#         plt.savefig(f"drsdata/evt{i}.png")
-#         plt.close()
+ofile.Close()
